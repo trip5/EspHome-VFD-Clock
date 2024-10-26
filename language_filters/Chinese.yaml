@@ -1,0 +1,79 @@
+substitutions:
+# Based on the following time & date formats (24 hour format should be unaffected):
+  time_format12: "%l:%M%p" # 1:25PM
+  date_format: "%b %d" # Jan 01
+  date_formatA: "%a" # Mon
+
+  # Custom characters: Unicode character:column1,column2,column3,column4,column5 (binary painting from bottom to top)
+  # 上下午月一二三四五六七八九十星期天
+  custom: "上:64,64,127,68,68;下:1,1,127,5,9;午:20,19,126,18,16;月:64,63,21,85,127;一:8,8,8,12,8;二:32,34,34,50,32;三:65,69,69,101,65;四:127,41,39,37,127;五:73,121,79,121,64;六:98,26,3,26,98;七:4,63,68,66,98;八:112,15,0,15,112;九:98,31,2,126,64;十:4,4,127,4,4;星:79,85,125,87,68;期:95,21,127,21,127;天:68,37,31,37,68;"
+  # I'm sorry if 期 looks bad
+
+text_sensor:
+  - platform: template
+    id: time_text
+    name: "$friendly_name Replacement Time Text"
+    entity_category: diagnostic
+    update_interval: never
+    internal: true
+    filters:
+      - append: ""
+      - prepend: ""
+      - substitute:
+          // Chinese generally puts the 上午/下午 before the time, so let's just use a different format entirely "%p%l%M" (PM1:25) and run a substitute on it
+          if (id(hour12_mode) == 1) {
+            int offset = 0;
+            // delete next 3 lines if using the HA version...
+            if (id(tzoffset_on) != 0) {
+              offset = (int)(60 * 60 * (id(tzoffset)));
+            }
+            std::time_t tz1time = (id(my_time).now().timestamp + offset);
+            std::tm *tz1time_astm = localtime(&tz1time);
+            char display_tmdt[20];
+            strftime(display_tmdt, 20, "%p%l:%M", tz1time_astm);
+            std::string tmdt(display_tmdt);
+            return tmdt;
+          } else {
+            return x;
+          }
+        - "AM -> 上午"
+        - "PM -> 下午"
+  - platform: template
+    id: date_text
+    name: "$friendly_name Replacement Date Text"
+    entity_category: diagnostic
+    update_interval: never
+    internal: true
+    filters:
+      - append: ""
+      - prepend: ""
+      - substitute:
+        - "Jan -> 一月"
+        - "Feb -> 二月"
+        - "Mar -> 三月"
+        - "Apr -> 四月"
+        - "May -> 五月"
+        - "Jun -> 六月"
+        - "Jul -> 七月"
+        - "Aug -> 八月"
+        - "Sep -> 九月"
+        - "Oct -> 十月"
+        - "Nov -> 十一月"
+        - "Dec -> 十二月"
+  - platform: template
+    id: dateA_text
+    name: "$friendly_name Replacement Date A Text"
+    entity_category: diagnostic
+    update_interval: never
+    internal: true
+    filters:
+      - append: ""
+      - prepend: ""
+      - substitute:
+        - "Sun -> 星期天"
+        - "Mon -> 星期一"
+        - "Tue -> 星期二"
+        - "Wed -> 星期三"
+        - "Thu -> 星期四"
+        - "Fri -> 星期五"
+        - "Sat -> 星期六"
