@@ -217,7 +217,7 @@ I also had to look at the official drivers for [Max7219](https://esphome.io/api/
 This driver may actually support more Futaba VFDs than the 8-MD-06INKM, but certain parts may need updating to function correctly.
 
 Please note also some of the sections of this driver are untested. For example, the displays have a reset pin and I'm not entirely certain what it actually does,
-despite being in the code.  The connection exists as a solder point on the VFD Clock but it is open...
+despite being in the code.  The connection exists as a solder point on the VFD Clock but it is open.
 
 ### Characters
 
@@ -250,7 +250,7 @@ display:
     en_pin: GPIO10 # optional, provides power to display (default: unused)
     intensity: 200 # optional, initial brightness 0 to 255 (default: 200)
     digits: # optional 6, 8 and 16 possible but have not been tested (default: 8)
-    scroll_delay: "2000, 500" # initial, subsequent delays when scrolling (in milliseconds) (default: 2000, 500)
+    scroll_delay: "2000, 500" # optional initial & subsequent delays when scrolling (in milliseconds) (default: 2000, 500)
     remove_spaces: "true" # optional, remove leading or trailing spaces (default: false)
     # Replace characters: Unicode character:Fubata byte (characters that already exist on the device, can use decimal, hex, or binary in MSB-LSB order)
     replace: "°:0b11101111"

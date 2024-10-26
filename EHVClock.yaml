@@ -564,7 +564,7 @@ interval:
 
 globals:
   - id: brightness_level
-    type: int
+    type: uint8_t
     restore_value: true
     initial_value: '200'
   - id: hour12_mode
@@ -584,11 +584,11 @@ globals:
     restore_value: false
     initial_value: 'false'
   - id: replace_interval
-    type: int
+    type: uint8_t
     restore_value: true
     initial_value: '0'
   - id: replace_interval_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: message
@@ -596,27 +596,27 @@ globals:
     restore_value: false
     initial_value: ''
   - id: message_display_time
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: message_clock_time
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: message_alive_time
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: message_display_time_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: message_clock_time_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: message_alive_time_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: date_display_mode
@@ -624,32 +624,32 @@ globals:
     restore_value: true
     initial_value: 'false'
   - id: time_display_time
-    type: int
+    type: uint8_t
     restore_value: true
     initial_value: '11'
   - id: date_display_time
-    type: int
+    type: uint8_t
     restore_value: true
     initial_value: '4'
   - id: time_display_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: date_display_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: sync_time
-    type: int
+    type: uint8_t
     restore_value: true
     initial_value: '8'
   - id: sync_time_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
 # TZ Offset Variables
   - id: tzoffset
-    type: float
+    type: int8_t
     restore_value: true
     initial_value: '0'
   - id: tzoffset_on
@@ -662,15 +662,15 @@ globals:
     restore_value: true
     initial_value: 'false'
   - id: wifi_stop_seek_time
-    type: int
+    type: uint8_t
     restore_value: true
     initial_value: '180'
   - id: wifi_stop_seek_time_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: seek_blink_led
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
 # Display Off Variables
@@ -679,15 +679,15 @@ globals:
     restore_value: false
     initial_value: 'false'
   - id: display_off_time
-    type: int
+    type: uint8_t
     restore_value: true
     initial_value: '0'
   - id: display_off_time_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: display_off_no_wifi_time
-    type: int
+    type: uint8_t
     restore_value: true
     initial_value: '0'
 
@@ -945,7 +945,7 @@ number:
     optimistic: true
     step: 5
     min_value: 60
-    max_value: 300
+    max_value: 255
     mode: box
     set_action:
       then:

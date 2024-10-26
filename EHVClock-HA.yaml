@@ -29,7 +29,7 @@ substitutions:
   # Please be sure to add those needed characters to the Replace or Custom characters as well, or those special characters will not be displayed!
 
   # This is the sensor name from your Home Assistant configuration
-  ha_sensor_data: sensor.led_pixelclock_data
+  ha_sensor_data: sensor.vfd_clock_data
 
   # Pins for Display
   clk_pin: GPIO12
@@ -639,7 +639,7 @@ interval:
 
 globals:
   - id: brightness_level
-    type: int
+    type: uint8_t
     restore_value: true
     initial_value: '200'
   - id: hour12_mode
@@ -659,11 +659,11 @@ globals:
     restore_value: false
     initial_value: 'false'
   - id: replace_interval
-    type: int
+    type: uint8_t
     restore_value: true
     initial_value: '0'
   - id: replace_interval_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: message
@@ -671,27 +671,27 @@ globals:
     restore_value: false
     initial_value: ''
   - id: message_display_time
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: message_clock_time
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: message_alive_time
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: message_display_time_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: message_clock_time_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: message_alive_time_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: date_display_mode
@@ -699,36 +699,36 @@ globals:
     restore_value: true
     initial_value: 'false'
   - id: time_display_time
-    type: int
+    type: uint8_t
     restore_value: true
     initial_value: '11'
   - id: date_display_time
-    type: int
+    type: uint8_t
     restore_value: true
     initial_value: '4'
   - id: time_display_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: date_display_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: sync_time
-    type: int
+    type: uint8_t
     restore_value: true
     initial_value: '8'
   - id: sync_time_count
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
 # HA Sensor variables
   - id: ha_sensor_data_this
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: ha_sensor_data_this_time
-    type: int
+    type: uint8_t
     restore_value: false
     initial_value: '0'
   - id: ha_sensor_data_now
@@ -744,7 +744,7 @@ globals:
     restore_value: true
     initial_value: 'false'
   - id: ha_sensor_data_time
-    type: int
+    type: uint8_t
     restore_value: true
     initial_value: '2'
 # Alt Time Zone variable
