@@ -108,7 +108,7 @@ external_components:
 # Use Trip5's VFDClock VFD8MD06INK ESPHome Component (for the Display)
   - source:
       type: git
-      url: https://github.com/trip5/vfdclock
+      url: https://github.com/trip5/EspHome-VFD-Clock
       ref: main
     refresh: 60s
     components: [ vfd8md06inkm ]
