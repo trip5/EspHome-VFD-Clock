@@ -3,7 +3,7 @@ substitutions:
   name: vfd-clock
   friendly_name: vfd-clock
   comment: "EHVClock from Trip5" # Based on EHLPClock-HA
-  project_version: "2024.10.25"
+  project_version: "2024.10.26"
   project_name: Trip5.EspHomeVfdClock
   waiting: "EHVClock" # shows when waiting for time
 
