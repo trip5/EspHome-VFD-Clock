@@ -2,8 +2,8 @@
 substitutions:
   name: vfd-clock
   friendly_name: vfd-clock
-  comment: "EHVClock from Trip5" # Based on EHLPClock-HA
-  project_version: "2024.10.26"
+  comment: "EHVClock from Trip5"
+  project_version: "2024.10.29"
   project_name: Trip5.EspHomeVfdClock
   waiting: "EHVClock" # shows when waiting for time
 
@@ -52,6 +52,10 @@ substitutions:
   # Custom characters: Unicode character:column1,column2,column3,column4,column5 (binary painting from bottom to top)
   custom: "₿:62,107,42,107,20;금:117,85,85,85,119;목:55,53,61,53,119;수:20,18,113,18,20;오:34,37,61,37,34;요:34,61,37,61,34;월:38,45,102,72,95;일:18,21,114,64,71;전:121,71,89,68,95;토:95,85,117,85,81;화:22,123,22,127,8;후:38,42,107,42,38"
 
+# Hard-coded variables (removed from UI because of memory constraints)
+  wifi_stop_seek_time: "180" # How many seconds to give up trying to connect to Wifi: 60 to 315 (do not go outside these numbers)
+  time_sync_interval: "8" # How often to sync the RTC: 1 to 24 (hours)
+
 esphome:
   name: $name
   comment: "$comment"
@@ -64,6 +68,12 @@ esphome:
       then:
         - lambda: 'id(display_off) = false;'
         - rx8025.read_time:
+        - globals.set:
+            id: sync_time
+            value: !lambda 'return $time_sync_interval;'
+        - globals.set:
+            id: wifi_stop_seek_time
+            value: !lambda 'return ($wifi_stop_seek_time - 60);'
     - priority: -100
       then:
         - wait_until:
@@ -526,18 +536,16 @@ interval:
       - lambda: |-
           if (id(wifi_stop_seek) == true && !id(wifi_id).is_connected() && !id(wifi_id).is_disabled()){
             id(wifi_stop_seek_time_count) += 1;
-            if (id(wifi_stop_seek_time_count) >= id(wifi_stop_seek_time)) {
+            if (id(wifi_stop_seek_time_count) >= id(wifi_stop_seek_time) + 60) {
               id(wifi_stop_seek_time_count) = 0;
-              id(led1).turn_off();
               id(wifi_id)->disable();
               id(display_ip).press();
             }
-          } else {
-            if (id(wifi_stop_seek) == false && id(wifi_id).is_disabled()) {
-              id(wifi_stop_seek_time_count) = 0;
-              id(wifi_id)->enable();
-              id(display_ip).press();
-            }
+          }
+          if (id(wifi_stop_seek) == false && id(wifi_id).is_disabled()) {
+            id(wifi_stop_seek_time_count) = 0;
+            id(wifi_id)->enable();
+            id(display_ip).press();
           }
           if (!id(wifi_id).is_connected() && !id(wifi_id).is_disabled()) {
             id(seek_blink_led) += 1;
@@ -552,6 +560,10 @@ interval:
                 call.perform();
               }
             }
+          }
+          if (id(led1).current_values.is_on() && (id(wifi_id).is_connected() || id(wifi_id).is_disabled())) {
+              auto call = id(led1).turn_off();
+              call.perform();
           }
           if (id(my_time).now().is_valid() && !id(display_off)) {
             if ((id(display_off_no_wifi_time) != 0 && (!id(wifi_id).is_connected() || id(wifi_id).is_disabled())) || id(display_off_time) != 0) {
@@ -641,7 +653,7 @@ globals:
     initial_value: '0'
   - id: sync_time
     type: uint8_t
-    restore_value: true
+    restore_value: false
     initial_value: '8'
   - id: sync_time_count
     type: uint8_t
@@ -663,8 +675,8 @@ globals:
     initial_value: 'false'
   - id: wifi_stop_seek_time
     type: uint8_t
-    restore_value: true
-    initial_value: '180'
+    restore_value: false
+    initial_value: '120'
   - id: wifi_stop_seek_time_count
     type: uint8_t
     restore_value: false
@@ -924,34 +936,6 @@ number:
         - lambda: |-
             id(tzoffset) = x;
             ESP_LOGD("main", "Time Zone Offset: %.2f hours", id(tzoffset));
-  - platform: template
-    name: "$friendly_name Time Sync Interval (hours)"
-    id: sync_time_select
-    restore_value: true
-    optimistic: true
-    step: 1
-    min_value: 1
-    max_value: 24
-    mode: box
-    set_action:
-      then:
-        - lambda: |-
-            id(sync_time) = x;
-            ESP_LOGD("main", "Time Sync Interval: %d hours", id(sync_time));
-  - platform: template
-    name: "$friendly_name Wifi Stop Seek Time (seconds)"
-    id: wifi_stop_seek_time_select
-    restore_value: true
-    optimistic: true
-    step: 5
-    min_value: 60
-    max_value: 255
-    mode: box
-    set_action:
-      then:
-        - lambda: |-
-            id(sync_time) = x;
-            ESP_LOGD("main", "Wifi Stop Seek Time: %d seconds", id(wifi_stop_seek_time));
   - platform: template
     name: "$friendly_name Display Off Time (minutes) (0 Disable)"
     id: display_off_time_select

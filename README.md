@@ -85,6 +85,7 @@ Read more in the [Custom Component Driver](#custom-component-driver) section.
 ### Time Sync
 
 Time can be synced to the Internet at configurable intervals between 1 - 24 hours, provided the wifi network is connected.
+In the HA version, this is selectable.  In the non-HA versions, this option is not selectable in the UI.  It must be fixed in the YAML.
 
 ## Non-HA Version
 
@@ -128,7 +129,9 @@ You can enable or disable this mode by holding the button for 5 seconds to toggl
 There are two options to turn off the display. One is to turn off the display after a configurable time when the clock is not being used (in minutes).
 The other is to turn off the display when there is no Wifi connection (in seconds).  The display may be turned on again by pressing the button.
 
-### Power Consumption (measured with 2024.10.26 Version, minimum 1 hour each mode)
+### Power Consumption
+
+Measured with 2024.10.26 Version, minimum 1 hour each mode
 
 | Status: Modes                                        | Power usage per hour |
 | ---------------------------------------------------- | -------------------- |
@@ -138,6 +141,8 @@ The other is to turn off the display when there is no Wifi connection (in second
 | No Wifi: Stop Seek Off & Display On - Brightness 100 | 204 mA |
 | No Wifi: Stop Seek On & Display On - Brightness 100  | 148 mA |
 | No Wifi: Stop Seek On & Display Off after 30 sec     | 123 mA |
+
+This is NOT a power-efficient clock.  If you would like a clock that consumes less millamps, I'd recommend something that uses a simple LED Display and runs [EspHome-Led-Clock](https://github.com/trip5/EspHome-Led-Clock).
 
 ### LED Output
 
@@ -277,6 +282,7 @@ it.strftime(const char *format, ESPTime time) __attribute__((format(strftime, 2,
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2024.10.29 | 2 variables in regular version now hard-coded, should free up more memory for custom characters |
 | 2024.10.26 | First release of YAMLs and VFD custom component (based on my other clocks, many functions included) |
 
 ### Custom Component Updates
