@@ -1,9 +1,9 @@
 # My github: https://github.com/trip5
 substitutions:
   name: vfd-clock
-  friendly_name: vfd-clock
+  friendly_name: VFD-Clock
   comment: "EHVClock from Trip5"
-  project_version: "2024.10.29"
+  project_version: "2024.11.11"
   project_name: Trip5.EspHomeVfdClock
   waiting: "EHVClock" # shows when waiting for time
 
@@ -57,11 +57,11 @@ substitutions:
   time_sync_interval: "8" # How often to sync the RTC: 1 to 24 (hours)
 
 esphome:
-  name: $name
-  comment: "$comment"
+  name: ${name}
+  comment: "${comment}"
   project:
-    name: "$project_name"
-    version: "$project_version"
+    name: "${project_name}"
+    version: "${project_version}"
   min_version: 2023.11.0
   on_boot:
     - priority: 600
@@ -70,10 +70,10 @@ esphome:
         - rx8025.read_time:
         - globals.set:
             id: sync_time
-            value: !lambda 'return $time_sync_interval;'
+            value: !lambda 'return ${time_sync_interval};'
         - globals.set:
             id: wifi_stop_seek_time
-            value: !lambda 'return ($wifi_stop_seek_time - 60);'
+            value: !lambda 'return (${wifi_stop_seek_time} - 60);'
     - priority: -100
       then:
         - wait_until:
@@ -86,13 +86,13 @@ esp8266:
   restore_from_flash: True
 
 wifi:
-  ssid: !secret wifi_ssid
+  ssid: !secret wifi_ssid_DNB
   password: !secret wifi_password
   reboot_timeout: 0s # reboot if no wifi (must be disabled for wifi to be turned off)
   enable_on_boot: True
   id: wifi_id
   ap:
-    ssid: $name
+    ssid: ${name}
     password: !secret ap_password
     ap_timeout: 10s # this has to be short, especially if using Stop Seek Wifi
   on_connect:
@@ -140,12 +140,12 @@ external_components:
 time:
   - platform: sntp # use SNTP as a time source
     id: my_time
-    timezone: "$time_zone"
+    timezone: "${time_zone}"
     update_interval: 24h # This seems like the longest safe amount of time - actual configured update happens in interval section (or when changing time zone)
   - platform: rx8025
     id: my_time_rx
     update_interval: never
-    timezone: "$time_zone"
+    timezone: "${time_zone}"
     address: ${rtc_address}
     battery1.5v: True
 
@@ -195,7 +195,7 @@ ota:
         - logger.log: "OTA Update started."
     on_progress:
       then:
-        - lambda: 'id(vf_display).printf("OTA %d%%", (int)x);'
+        - lambda: 'if (x > 9) { id(vf_display).printf("OTA %d%%", (int)x); }'
         - logger.log:
             format: "OTA progress %0.1f%%"
             args: ["x"]
@@ -221,33 +221,33 @@ captive_portal:
 
 text_sensor:
   - platform: version
-    name: "$friendly_name ESPHome Version"
+    name: "${friendly_name} ESPHome Version"
     hide_timestamp: true
     entity_category: diagnostic
   - platform: wifi_info
     ip_address:
       id: wifi_ip
-      name: "$friendly_name IP Address"
+      name: "${friendly_name} IP Address"
       entity_category: diagnostic
     ssid:
       id: wifi_ssid
-      name: "$friendly_name SSID"
+      name: "${friendly_name} SSID"
       entity_category: diagnostic
   - platform: template
     name: "${friendly_name} ${project_name} Version"
-    lambda: 'return to_string("$project_version");'
+    lambda: 'return to_string("${project_version}");'
     entity_category: diagnostic
     update_interval: 1h
   - platform: template
-    name: "$friendly_name Time Zone"
-    lambda: 'return {"$time_zone"};'
+    name: "${friendly_name} Time Zone"
+    lambda: 'return {"${time_zone}"};'
     entity_category: diagnostic
     update_interval: 1h
   # Below this point are text sensors to hold time and date and allow for substitutions... you can delete/edit the filters, just don't delete the entire text sensor
   # The github repo should also contain methods to change the time into other localized formats.
   - platform: template
     id: time_text
-    name: "$friendly_name Replacement Time Text"
+    name: "${friendly_name} Replacement Time Text"
     entity_category: diagnostic
     update_interval: never
     internal: true
@@ -275,7 +275,7 @@ text_sensor:
         - "PM -> 오후"
   - platform: template
     id: date_text
-    name: "$friendly_name Replacement Date Text"
+    name: "${friendly_name} Replacement Date Text"
     entity_category: diagnostic
     update_interval: never
     internal: true
@@ -297,7 +297,7 @@ text_sensor:
         - "Dec -> 12월"
   - platform: template
     id: dateA_text
-    name: "$friendly_name Replacement Date A Text"
+    name: "${friendly_name} Replacement Date A Text"
     entity_category: diagnostic
     update_interval: never
     internal: true
@@ -317,13 +317,13 @@ output:
   - platform: esp8266_pwm
     id: statusled
     pin:
-      number: $status_led_pin
+      number: ${status_led_pin}
       inverted: true
 
 light:
   - platform: monochromatic
     id: led1
-    name: "$friendly_name Status LED"
+    name: "${friendly_name} Status LED"
     output: statusled
     internal: true
 
@@ -331,25 +331,25 @@ preferences:
   flash_write_interval: 15s # 0 does immediate write to memory with no mem buffer (not recommended) (only saves when persistent variables have changed)
 
 i2c:
-  sda: $sda_pin
-  scl: $scl_pin
+  sda: ${sda_pin}
+  scl: ${scl_pin}
   scan: true
   id: i2cbus
-  frequency: $i2c_frequency
+  frequency: ${i2c_frequency}
 
 spi:
-  clk_pin: $clk_pin
-  mosi_pin: $mosi_pin
+  clk_pin: ${clk_pin}
+  mosi_pin: ${mosi_pin}
 
 # Some info how to handle multi_click options: https://community.home-assistant.io/t/esphome-button-held-double-press/136083/10
 binary_sensor:
   - platform: status
-    name: "$friendly_name Status"
+    name: "${friendly_name} Status"
   - platform: gpio
     pin: 
-      number: $button_pin
+      number: ${button_pin}
       inverted: true
-    name: "$friendly_name Button"
+    name: "${friendly_name} Button"
     filters:
       - delayed_on: 10ms
       - delayed_off: 10ms
@@ -420,13 +420,13 @@ binary_sensor:
 display:
   - platform: vfd8md06inkm
     id: vf_display
-    cs_pin: $cs_pin
-    reset_pin: $reset_pin
-    intensity: $intensity
-    remove_spaces: $remove_spaces
-    scroll_delay: $scroll_delay
-    replace: $replace
-    custom: $custom
+    cs_pin: ${cs_pin}
+    reset_pin: ${reset_pin}
+    intensity: ${intensity}
+    remove_spaces: ${remove_spaces}
+    scroll_delay: ${scroll_delay}
+    replace: ${replace}
+    custom: ${custom}
     update_interval: 1s    # Update interval (optional)
     lambda: |-
       // Display the message if all conditions are met
@@ -464,7 +464,7 @@ display:
               id(date_display_count) += 1;
               // if date_formatA is on, display it for 50% of the time first, after the 1st...
               if ((id(date_A_mode) == true) && (id(date_display_count) <= (id(date_display_time) / 2))) {
-                strftime(display_tmdt, 20, "$date_formatA", tz1time_astm);
+                strftime(display_tmdt, 20, "${date_formatA}", tz1time_astm);
                 // check if Date A text replacement should be made
                 if (id(replace_mode_auto) == true) {
                   std::string tmdt(display_tmdt);
@@ -472,7 +472,7 @@ display:
                   strcpy(display_tmdt, id(dateA_text).state.c_str());
                 }
               } else {
-                strftime(display_tmdt, 20, "$date_format", tz1time_astm);
+                strftime(display_tmdt, 20, "${date_format}", tz1time_astm);
                 // check if Date text replacement should be made
                 if (id(replace_mode_auto) == true) {
                   std::string tmdt(display_tmdt);
@@ -485,9 +485,9 @@ display:
               id(time_display_count) += 1;
               // choose which time format to display
               if (id(hour12_mode) == true) {
-                strftime(display_tmdt, 20, "$time_format12", tz1time_astm);
+                strftime(display_tmdt, 20, "${time_format12}", tz1time_astm);
               } else {
-                strftime(display_tmdt, 20, "$time_format24", tz1time_astm);
+                strftime(display_tmdt, 20, "${time_format24}", tz1time_astm);
               }
               // check if Time text replacement should be made
               if (id(replace_mode_auto) == true) {
@@ -512,7 +512,9 @@ display:
           }
         }
       } else {
-        it.print("$waiting");
+        if (!id(display_off)) {
+          it.print("${waiting}");
+        }
       }
       // This next bit handles the display_off stuff
       if (id(display_off)) {
@@ -566,10 +568,10 @@ interval:
               call.perform();
           }
           if (id(my_time).now().is_valid() && !id(display_off)) {
-            if ((id(display_off_no_wifi_time) != 0 && (!id(wifi_id).is_connected() || id(wifi_id).is_disabled())) || id(display_off_time) != 0) {
+            if (id(display_off_no_wifi_time) != 0 || id(display_off_time) != 0) {
               id(display_off_time_count) = id(display_off_time_count) + 1;
             }
-            if ((id(display_off_time) != 0 && id(display_off_time_count) >= (id(display_off_time) * 60)) || (id(display_off_no_wifi_time) != 0 && id(display_off_time_count) >= id(display_off_no_wifi_time))) {
+            if ((id(display_off_time) != 0 && id(display_off_time_count) >= (id(display_off_time) * 60)) || (id(display_off_no_wifi_time) != 0 && id(display_off_time_count) >= id(display_off_no_wifi_time) && (!id(wifi_id).is_connected() || id(wifi_id).is_disabled()))) {
               id(display_off_activate).execute();
             }
           }
@@ -695,7 +697,7 @@ globals:
     restore_value: true
     initial_value: '0'
   - id: display_off_time_count
-    type: uint8_t
+    type: uint16_t
     restore_value: false
     initial_value: '0'
   - id: display_off_no_wifi_time
@@ -706,7 +708,7 @@ globals:
 button:
   - platform: restart
     id: restart_button
-    name: "$friendly_name Restart"
+    name: "${friendly_name} Restart"
     entity_category: diagnostic
   - platform: template
     id: display_ip
@@ -737,7 +739,7 @@ button:
 
 switch:
   - platform: template
-    name: "$friendly_name 12 Hour Mode"
+    name: "${friendly_name} 12 Hour Mode"
     id: hour12_select
     restore_mode: RESTORE_DEFAULT_OFF
     lambda: 'return id(hour12_mode);'
@@ -750,7 +752,7 @@ switch:
             ESP_LOGD("main", "12 Hour Mode Off");
             id(hour12_mode) = false;
   - platform: template
-    name: "$friendly_name Date A Mode"
+    name: "${friendly_name} Date A Mode"
     id: date_A_select
     restore_mode: RESTORE_DEFAULT_OFF
     lambda: 'return id(date_A_mode);'
@@ -763,7 +765,7 @@ switch:
             ESP_LOGD("main", "Date A Mode Off");
             id(date_A_mode) = false;
   - platform: template
-    name: "$friendly_name Replacement Mode"
+    name: "${friendly_name} Replacement Mode"
     id: replace_mode_select
     restore_mode: RESTORE_DEFAULT_OFF
     lambda: 'return id(replace_mode);'
@@ -793,7 +795,7 @@ switch:
             ESP_LOGD("main", "Replace Mode Auto Off");
             id(replace_mode_auto) = false;
   - platform: template
-    name: "$friendly_name Time Zone Offset On"
+    name: "${friendly_name} Time Zone Offset On"
     id: tzoffset_on_select
     restore_mode: RESTORE_DEFAULT_OFF
     lambda: 'return id(tzoffset_on);'
@@ -806,7 +808,7 @@ switch:
             ESP_LOGD("main", "TZ Offset Off");
             id(tzoffset_on) = false;
   - platform: template
-    name: "$friendly_name Date Display Mode"
+    name: "${friendly_name} Date Display Mode"
     id: date_mode_select
     restore_mode: RESTORE_DEFAULT_OFF
     lambda: 'return id(date_display_mode);'
@@ -827,7 +829,7 @@ switch:
             id(message_display_time) = 1;
             id(message_clock_time) = 0;
   - platform: template
-    name: "$friendly_name Wifi Stop Seek"
+    name: "${friendly_name} Wifi Stop Seek"
     id: wifi_stop_seek_select
     restore_mode: RESTORE_DEFAULT_OFF
     lambda: 'return id(wifi_stop_seek);'
@@ -852,7 +854,7 @@ switch:
 
 number:
   - platform: template
-    name: "$friendly_name Brightness"
+    name: "${friendly_name} Brightness"
     id: brightness_select
     restore_value: true
     optimistic: true
@@ -868,7 +870,7 @@ number:
             ESP_LOGD("main", "Brightness: %d", id(brightness_level));
         - script.execute: display_off_deactivate
   - platform: template
-    name: "$friendly_name Time Display Time"
+    name: "${friendly_name} Time Display Time"
     id: time_display_time_select
     restore_value: true
     optimistic: true
@@ -884,7 +886,7 @@ number:
             id(time_display_time) = x;
             ESP_LOGD("main", "Time Display Time: %d seconds", id(time_display_time));
   - platform: template
-    name: "$friendly_name Date Display Time"
+    name: "${friendly_name} Date Display Time"
     id: date_display_time_select
     restore_value: true
     optimistic: true
@@ -900,7 +902,7 @@ number:
             id(date_display_time) = x;
             ESP_LOGD("main", "Date Display Time: %d seconds", id(date_display_time));
   - platform: template
-    name: "$friendly_name Auto Replacement Interval"
+    name: "${friendly_name} Auto Replacement Interval"
     id: replace_interval_select
     restore_value: true
     optimistic: true
@@ -921,7 +923,7 @@ number:
               }
             }
   - platform: template
-    name: "$friendly_name Time Zone Offset"
+    name: "${friendly_name} Time Zone Offset"
     id: tzoffset_select
     restore_value: true
     optimistic: true
@@ -937,7 +939,7 @@ number:
             id(tzoffset) = x;
             ESP_LOGD("main", "Time Zone Offset: %.2f hours", id(tzoffset));
   - platform: template
-    name: "$friendly_name Display Off Time (minutes) (0 Disable)"
+    name: "${friendly_name} Display Off Time (minutes) (0 Disable)"
     id: display_off_time_select
     restore_value: true
     optimistic: true
@@ -952,7 +954,7 @@ number:
             ESP_LOGD("main", "Display Off Time: %d minutes", id(display_off_time));
         - script.execute: display_off_deactivate
   - platform: template
-    name: "$friendly_name Display Off When No Wifi Time (seconds) (0 Disable)"
+    name: "${friendly_name} Display Off When No Wifi Time (seconds) (0 Disable)"
     id: display_off_no_wifi_time_select
     restore_value: true
     optimistic: true

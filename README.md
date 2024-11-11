@@ -1,10 +1,12 @@
 # EspHome-VFD-Clock
 
-EHVC is meant to be used on ESP-based VFD (Vaccuum Fluorescent Display) Clocks using ESPHome. So far, it works with the appropriately named VFD Clock but it can probably be adapted for use with other SPI-based clocks (especially the Fubata 16-bit display). And, of course, it's ESPHome, so it's only limited by your imagination and skill.
+EHVC is meant to be used on ESP-based VFD (Vaccuum Fluorescent Display) Clocks using ESPHome. So far, it works with the appropriately named VFD Clock but it can probably be adapted for use with other SPI character-display clocks (especially the Fubata 16-bit display). And, of course, it's ESPHome, so it's only limited by your imagination and skill.
 
 A lot of inspiration is taken from the [`EHMTXv2`](https://github.com/lubeda/EspHoMaTriXv2) project... but with an 8-character VFD display.
 
-Using this clock requires the 8-MD-06INKM display to be supported by an external component which is included in this repository. I suspect that other Futaba VFD displays can also be supported, especially if they use the Hitachi HD44780U interface. Skip down a bit to read about the driver included in this repository.
+Using this clock requires the 8-MD-06INKM display to be supported by an external component which is included in this repository. I suspect that other Futaba VFD displays can also be supported, especially if they use the Hitachi HD44780U interface.
+
+Skip down to the [Custom Component Driver](#custom-component-driver) section below if you're just here for the driver.
 
 Due to memory constraints on the ESP8266 these clocks use, I've decided to split the functions by how you may choose to use the clock.  Read below for more details.
 
@@ -94,7 +96,7 @@ It includes all of the functions above as well as these below.  This version has
 So if you need a travel clock, this may be the ideal one for you.  It can still be controlled by Home Assistant as well but is not dependent on it to function.
 
 Please note that unlike LED-based clocks, a VFD uses a significant amount of power, so it would be very unwise to run this clock from a battery
-with the display always-on.  So, if you are thinking of this,
+with the display always-on.  Take a look at power consumption in the [Power Consumption](#power-consumption) section below.
 
 ### Time Zone Offset
 
@@ -131,18 +133,22 @@ The other is to turn off the display when there is no Wifi connection (in second
 
 ### Power Consumption
 
-Measured with 2024.10.26 Version, minimum 1 hour each mode
+*2024.11.10 Version, 1 hour each mode, measured with a FNIRSI FNB-58 powered externally*
 
-| Status: Modes                                        | Power usage per hour |
-| ---------------------------------------------------- | -------------------- |
-| Connected: Display On - Brightness 200               | 226 mA |
-| Connected: Display On - Brightness 100               | 202 mA |
-| Connected: Display Off after 5 min                   | 184 mA |
-| No Wifi: Stop Seek Off & Display On - Brightness 100 | 204 mA |
-| No Wifi: Stop Seek On & Display On - Brightness 100  | 148 mA |
-| No Wifi: Stop Seek On & Display Off after 30 sec     | 123 mA |
+| Status: Modes                                        | Power usage |
+| ---------------------------------------------------- | ----------- |
+| Connected: Display On - Brightness 200               | 234.65 mAh  |
+| Connected: Display On - Brightness 30                | 204.46 mAh  |
+| Connected: Display Off after 5 min                   | 196.55 mAh  |
+| No Wifi: Stop Seek Off & Display On - Brightness 30  | 205.12 mAh  |
+| No Wifi: Stop Seek On & Display On - Brightness 30   | 154.76 mAh  |
+| No Wifi: Stop Seek On & Display Off after 30 sec     | 142.86 mAh  |
 
-This is NOT a power-efficient clock.  If you would like a clock that consumes less millamps, I'd recommend something that uses a simple LED Display and runs [EspHome-Led-Clock](https://github.com/trip5/EspHome-Led-Clock).
+#### What Does This Mean?
+
+On maximum power savings, you could power the clock from a 5000mAh powerbank for a day and a bit: `5000mAh / 143mA ≈ 34.9 hours`...
+
+This is **NOT** a power-efficient clock.  If you would like a clock that consumes less power, I'd recommend something that uses an LED Display like [EspHome-Led-Clock](https://github.com/trip5/EspHome-Led-Clock) or [EspHome-Led-PixelClock](https://github.com/trip5/EspHome-Led-PixelClock).
 
 ### LED Output
 
@@ -282,6 +288,7 @@ it.strftime(const char *format, ESPTime time) __attribute__((format(strftime, 2,
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2024.11.11 | Display Off routine fix, power measurements complete |
 | 2024.10.29 | 2 variables in regular version now hard-coded, should free up more memory for custom characters |
 | 2024.10.26 | First release of YAMLs and VFD custom component (based on my other clocks, many functions included) |
 

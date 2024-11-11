@@ -56,7 +56,7 @@ Since the syntax of this uses a colon, you can replace the colon itself by simpl
 ```
 custom: ":0,54,54,0,0"
 ```
-This example will make a thicker colon like the picture at the top.
+This example will make a thicker colon like the product picture.
 
 ## Notes about Characters
 
@@ -70,7 +70,7 @@ Keep in mind that if trying to display something that uses more than 8 custom ch
 
 Although I have used Korean on my clock, this is a fairly limited character set. Replacing characters using either method requires in-memory lookup tables (TWO!)
 that are checked for each and every character to be printed to the display. The VFD Clock runs on an ESP-12. It's not exactly top-of-the-line.
-Add a few characters at a time and be sure that your clock isn't siginificantly slowing down, especially if you are display seconds.
+Add a few characters at a time and be sure that your clock isn't significantly slowing down, especially if you are display seconds.
 I have not tested it with more than 30 characters total.
 
 ### Mass Conversion of Numbers / A Warning About ChatGPT
@@ -85,7 +85,7 @@ This one is also useful: https://www.mathsisfun.com/binary-decimal-hexadecimal-c
 
 Here are some animated tables from the specification, overlaid with decimals to make finding your replacement character easier.
 
-To prepare the GIF, I used a [PPTX](./images/Make_Decimal_GIF.ppt) printed with [PDFill](https://www.pdfill.com/)
+To prepare the GIF, I used a [PPTX](./images/Make_Decimal_GIF.pptx) printed with [PDFill](https://www.pdfill.com/)
 and then animated with [Ezgif](https://ezgif.com/).
 
 Keep in mind that every model of display will have different tables.
@@ -105,6 +105,6 @@ Fat colon:`:0,54,54,0,0`
 ### Currency
 
 ```
-₿:62,107,42,107,20;
+₿:62,107,42,107,20;₩:63,100,60,100,63;
 ```
 
