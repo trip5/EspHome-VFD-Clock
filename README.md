@@ -133,7 +133,7 @@ The other is to turn off the display when there is no Wifi connection (in second
 
 ### Power Consumption
 
-*2024.11.10 Version, 1 hour each mode, measured with a FNIRSI FNB-58 powered externally*
+*2024.11.11 Version, 1 hour each mode, measured with a FNIRSI FNB-58 powered externally*
 
 | Status: Modes                                        | Power usage |
 | ---------------------------------------------------- | ----------- |
