@@ -46,7 +46,7 @@ CONFIG_SCHEMA = (
             cv.Optional(CONF_EN_PIN): pins.gpio_output_pin_schema,
             cv.Optional(CONF_INTENSITY, default=200): cv.int_range(min=0, max=255),
             cv.Optional(CONF_DIGITS, default=8): cv.int_range(6,8,16),
-            cv.Optional(CONF_SCROLL_DELAY, default="2000,500"): cv.All(cv.string, validate_scroll_delay),
+            cv.Optional(CONF_SCROLL_DELAY, default="1500,500"): cv.All(cv.string, validate_scroll_delay),
             cv.Optional(CONF_REMOVE_SPACES, default=False): cv.boolean,
             cv.Optional(CONF_REPLACE_STRING, default=""): cv.string,
             cv.Optional(CONF_CUSTOM_STRING, default=""): cv.string,

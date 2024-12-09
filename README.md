@@ -173,6 +173,8 @@ You could consider hosting the file on another machine in-house, too by using so
   js_include: ""
   js_url: "http://192.168.1.1/esphome-www/www.js"
 ```
+Please note that for some reason, I'm not sure that the UI can be viewed from an Chrome-based mobile browser. Maybe my phone has an issue.
+It seems to work fine when viewing on a computer or an Apple phone. If you have information to share, I'd be glad to know why this is.
 
 ## Home Assistant Version
 
@@ -261,7 +263,7 @@ display:
     en_pin: GPIO10 # optional, provides power to display (default: unused)
     intensity: 200 # optional, initial brightness 0 to 255 (default: 200)
     digits: # optional 6, 8 and 16 possible but have not been tested (default: 8)
-    scroll_delay: "2000, 500" # optional initial & subsequent delays when scrolling (in milliseconds) (default: 2000, 500)
+    scroll_delay: "500, 500" # optional initial & subsequent delays when scrolling (in milliseconds) (default: 1500, 500) (first text = both numbers combined)
     remove_spaces: "true" # optional, remove leading or trailing spaces (default: false)
     # Replace characters: Unicode character:Fubata byte (characters that already exist on the device, can use decimal, hex, or binary in MSB-LSB order)
     replace: "°:0b11101111"
@@ -288,6 +290,7 @@ it.strftime(const char *format, ESPTime time) __attribute__((format(strftime, 2,
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2024.12.09 | Recoded to remove many global variables, relying on numbers and switches where possible, hard-coded variables removed |
 | 2024.11.11 | Display Off routine fix, power measurements complete |
 | 2024.10.29 | 2 variables in regular version now hard-coded, should free up more memory for custom characters |
 | 2024.10.26 | First release of YAMLs and VFD custom component (based on my other clocks, many functions included) |
@@ -296,6 +299,7 @@ it.strftime(const char *format, ESPTime time) __attribute__((format(strftime, 2,
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2024.12.09 | Scroll text initial delay fix (initial delay was starting without displaying) |
 | 2024.10.26 | Support for Futaba 8-MD-06INKM display |
 
 

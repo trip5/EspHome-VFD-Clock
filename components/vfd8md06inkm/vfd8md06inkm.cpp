@@ -196,6 +196,7 @@ void VFDComponent::loop()
   if (this->is_scrolling_) 
   {
     // Check if it's time to update the display
+    // due to the way this works, first text is actually displayed for time of initial delay + subsequent delay...
     if (millis() - this->last_update_time_ >= (this->scroll_index_ == 0 ? this->initial_delay_ : this->subsequent_delay_)) 
     {
       std::string display_text;
@@ -418,6 +419,7 @@ uint8_t VFDComponent::print(const char *str)
       this->scroll_index_ = 0; // Reset scroll index
       this->is_scrolling_ = true; // Set scrolling flag
       this->last_update_time_ = millis(); // Initialize last update time
+      show(0, temp.substr(0, this->digits_).c_str()); // Display first part of text
     }
   }
   return 0; // Function complete
