@@ -87,7 +87,6 @@ Read more in the [Custom Component Driver](#custom-component-driver) section.
 ### Time Sync
 
 Time can be synced to the Internet at configurable intervals between 1 - 24 hours, provided the wifi network is connected.
-In the HA version, this is selectable.  In the non-HA versions, this option is not selectable in the UI.  It must be fixed in the YAML.
 
 ## Non-HA Version
 
