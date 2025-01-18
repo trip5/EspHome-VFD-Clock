@@ -29,7 +29,7 @@ You are NOT limited to 8 characters total (but the display is limited to 8 chara
 
 The customized characters must be first drawn using bits, which will form 7-bit bytes (at least on the 8-MD-06INKM).
 
-Here is a basic represention of the Korean Hangul character "il" in an 5x7 grid:
+Here is a basic representation of the Korean Hangul character "il" in an 5x7 grid:
 
 ![image](./images/il1.jpg)
 
@@ -100,7 +100,14 @@ Check the [language filters](./language_filters/) folder if looking for specific
 
 ### Punctuation
 
-Fat colon:`:0,54,54,0,0`
+Fat colon:
+```
+:0,54,54,0,0;
+```
+Round degree:
+```
+°:0,6,9,9,6;
+```
 
 ### Currency
 
