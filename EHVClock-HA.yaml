@@ -137,7 +137,11 @@ script:
       - lambda: 'id(my_time)->update();'
       - rx8025.write_time:
 
+# Enable Home Assistant API
 api:
+  # delete next 2 lines if not using HA API encryption
+  encryption:
+    key: !secret encryption_key
   reboot_timeout: 15min # 15min is default
   # This next section creates the Home Assistant services to allow messages to be displayed (also used for certain system messages)
   services:
