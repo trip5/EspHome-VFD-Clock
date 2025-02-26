@@ -229,6 +229,25 @@ Anything in `configuration.yaml` under the `template:` heading must now be moved
 The file [`template.yaml`](template.yaml) contains several examples how to add sensors that can be automatically shown by the clock.
 I personally use only one sensor in my Home Assistant and 2 clocks in the house get data from the same sensor but you can (of course) create a sensor for each  individual clock.
 
+### Notice Regarding Flash Size
+
+It has come to my attention that certain clocks have what could be a fake ESP-12H stamp on the back.  My clocks all have an ESP-12F (an "upgraded" version of the ESP-12E) with 4M of flash memory. An ESP-12H should have 2M of flash but these only have 1M of flash memory! They look like this:
+
+![ESP-12H](images/ESP-12H.jpg)
+
+I'm told that physically flashing the ESP works but the clock does not retain settings and cannot be OTA updated.  Change your board section to this:
+
+```
+esp8266:
+  board: esp07
+  restore_from_flash: True
+```
+
+Please note that to be 100% certain of this, you may need to use [esptool](https://www.flamingo-tech.nl/2021/03/21/installing-and-using-esptools/) to determine for certain with this command:
+
+```
+esptool.py -p PORT flash_id
+```
 
 ## Custom Component Driver
 
