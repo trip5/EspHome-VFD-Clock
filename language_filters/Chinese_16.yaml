@@ -14,7 +14,7 @@ text_sensor:
     internal: true
     filters:
       - lambda: |-
-          // Use the format "%p%l:%M:S" (PM 1:25:59) and run filters on it to get 下午1:25:59
+          // Use the format "%p%I:%M:S" (PM 1:25:59) and run filters on it to get 下午1:25:59
           if (id(hour12_mode).state == 1) {
             int offset = 0;
             // delete next 3 lines if using the HA version...
@@ -24,7 +24,7 @@ text_sensor:
             std::time_t tz1time = (id(my_time).now().timestamp + offset);
             std::tm *tz1time_astm = localtime(&tz1time);
             char display_tmdt[20];
-            strftime(display_tmdt, 20, "%p%l:%M:%S", tz1time_astm);
+            strftime(display_tmdt, 20, "%p%I:%M:%S", tz1time_astm);
             std::string tmdt(display_tmdt);
             return tmdt;
           } else {
