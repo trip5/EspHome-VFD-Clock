@@ -317,8 +317,8 @@ esptool.py -p PORT erase_flash
 
 ### Notice Regarding the LGL Studio V16
 
-I do not have a character table for the Unknown Samsung display used in this clock.  That makes replacements impossible for now.
-I will improve the documentation regarding the special characters in the ASCII 128-255 range in a future update.
+Most of the `_16` language filters were made before mapping out the character replacements available.  I may come back to these and fix them later.
+I'm pretty sure most will not work correctly.
 
 There is a speaker on GPIO12.  Alarms may be implemented in a future update.
 

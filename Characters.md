@@ -79,18 +79,13 @@ that are checked for each and every character to be printed to the display. The 
 Add a few characters at a time and be sure that your clock isn't significantly slowing down, especially if you are display seconds.
 I have not tested it with more than 30 characters total.
 
-## Character Tables
-
-Here are some animated tables from the specification, overlaid with decimals to make finding your replacement character easier.
-
-To prepare the GIF, I used a [PPTX](./images/Make_Decimal_GIF.pptx) printed with [PDFill](https://www.pdfill.com/)
-and then animated with [Ezgif](https://ezgif.com/).
-
-Keep in mind that every model of display will have different tables.
-
-### 8-MD-06INKM
+### 8-MD-06INKM / VFD Clock Display
 
 ![image](./images/8-MD-06INKM-Characters-Decimals.gif)
+
+### LGL Studio V16 Display
+
+![image](./images/LGLStudioV16-Characters.jpg)
 
 ## Custom Characters
 
@@ -125,6 +120,86 @@ This one is also useful: https://www.mathsisfun.com/binary-decimal-hexadecimal-c
 
 Hopefully OnlineGDB hosts this [`Glyphs Helper`](https://www.onlinegdb.com/fork/zh1VszNT1) for a long while. This can help when making a list of unique characters.
 
-### A Warning About ChatGPT
+#### A Warning About ChatGPT
 
 I tried using ChatGPT to convert the Korean binary codes to decimal to save space in my YAML. It made mistakes. Seriously...?
+
+## Animated Character Table
+
+To prepare the GIF, I used a [PPTX](./images/Make_Decimal_GIF.pptx) printed with [PDFill](https://www.pdfill.com/) to 2 GIFs
+and then animated with [Ezgif](https://ezgif.com/).
+
+Keep in mind that every PDF spec will have different tables.
+
+## Handmade Character Tables
+
+To make this table, I used the below table to send 8 characters at a time through Home Assistant to the clock and took pictures,
+cropping them manually into an [ODT](./images/Make_Characters.odt) and printed with [PDFill](https://www.pdfill.com/) to a JPG.
+
+This list starts with ASCII character 128 and finishes with 255.  Nevermind the weird appearance (especially the 6th line).
+It will work, I promise.
+
+128-135:
+```
+       
+```
+136-143:
+```
+       
+```
+144-151:
+```
+       
+```
+152-159:
+```
+       
+```
+160-167:
+```
+  ¡ ¢ £ ¤ ¥ ¦ §
+```
+168-175:
+```
+¨ © ª « ¬ ­ ® ¯
+```
+176-183:
+```
+° ± ² ³ ´ µ ¶ ·
+```
+184-191:
+```
+¸ ¹ º » ¼ ½ ¾ ¿
+```
+192-199:
+```
+À Á Â Ã Ä Å Æ Ç
+```
+200-207:
+```
+È É Ê Ë Ì Í Î Ï
+```
+208-215:
+```
+Ð Ñ Ò Ó Ô Õ Ö ×
+```
+216-223:
+```
+Ø Ù Ú Û Ü Ý Þ ß
+```
+224-231:
+```
+à á â ã ä å æ ç
+```
+232-239:
+```
+è é ê ë ì í î ï
+```
+240-247:
+```
+ð ñ ò ó ô õ ö ÷
+```
+248-255:
+```
+ø ù ú û ü ý þ ÿ
+```
