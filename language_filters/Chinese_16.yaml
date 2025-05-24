@@ -1,0 +1,152 @@
+substitutions:
+
+  # Custom characters: Unicode character:column1,column2,column3,column4,column5 (binary painting from bottom to top)
+  # 上下午月日星期天一二三四五六七八九十 - sorry if 期 looks bad
+  custom: "上:64,64,127,68,68;下:1,1,127,5,9;午:20,19,126,18,16;月:64,63,21,85,127;日:127,73,73,73,127;星:79,85,125,87,68;期:95,21,127,21,127;天:68,37,31,37,68;一:10,10,10,10,10;二:32,34,34,34,32;三:65,73,73,73,73;四:127,41,39,37,127;五:73,121,79,121,64;六:98,26,3,26,98;七:4,63,68,66,98;八:112,15,0,15,112;九:98,31,2,126,64;十:8,8,127,8,8;年:36,59,42,42,126;"
+
+text_sensor:
+
+  - platform: template
+    id: time_text
+    name: "${friendly_name} Replacement Time Text"
+    entity_category: diagnostic
+    update_interval: never
+    internal: true
+    filters:
+      - lambda: |-
+          // Use the format "%p%l:%M:S" (PM 1:25:59) and run filters on it to get 下午1:25:59
+          if (id(hour12_mode).state == 1) {
+            int offset = 0;
+            // delete next 3 lines if using the HA version...
+            if (id(tzoffset_on).state != 0) {
+              offset = (int)(60 * 60 * (id(tzoffset).state));
+            }
+            std::time_t tz1time = (id(my_time).now().timestamp + offset);
+            std::tm *tz1time_astm = localtime(&tz1time);
+            char display_tmdt[20];
+            strftime(display_tmdt, 20, "%p%l:%M:%S", tz1time_astm);
+            std::string tmdt(display_tmdt);
+            return tmdt;
+          } else {
+            return x;
+          }
+      - append: ""
+      - prepend: ""
+      - substitute:
+        - "M0 -> M" # removes leading 0 on Hours
+        - "AM -> 上午"
+        - "PM -> 下午"
+  - platform: template
+    id: date_text
+    name: "${friendly_name} Replacement Date Text"
+    entity_category: diagnostic
+    update_interval: never
+    internal: true
+    filters:
+      - lambda: |-
+          // Use the format "%Y! %b %d#" (2025 ! May x 23) and run filters on it to get 2025年 5月 23日 or 2025年 五月 二十三日 or 2025年 五月 23日
+          int offset = 0;
+          // delete next 3 lines if using the HA version...
+          if (id(tzoffset_on).state != 0) {
+            offset = (int)(60 * 60 * (id(tzoffset).state));
+          }
+          std::time_t tz1time = (id(my_time).now().timestamp + offset);
+          std::tm *tz1time_astm = localtime(&tz1time);
+          char display_tmdt[20];
+          strftime(display_tmdt, 20, "%Y! %b %d#", tz1time_astm);
+          std::string tmdt(display_tmdt);
+          return tmdt;
+      - append: "日"
+      - prepend: ""
+      - substitute:
+        # you can use the following to get 2025年 5月 23日
+        - "Jan -> 1月"
+        - "Feb -> 2月"
+        - "Mar -> 3月"
+        - "Apr -> 4月"
+        - "May -> 5月"
+        - "Jun -> 6月"
+        - "Jul -> 7月"
+        - "Aug -> 8月"
+        - "Sep -> 9月"
+        - "Oct -> 10月"
+        - "Nov -> 11月"
+        - "Dec -> 12月"
+        # you can use the following to get 2025年 五月 23日 (delete the 5月23日 section)
+        - "Jan -> 一月"
+        - "Feb -> 二月"
+        - "Mar -> 三月"
+        - "Apr -> 四月"
+        - "May -> 五月"
+        - "Jun -> 六月"
+        - "Jul -> 七月"
+        - "Aug -> 八月"
+        - "Sep -> 九月"
+        - "Oct -> 十月"
+        - "Nov -> 十一月"
+        - "Dec -> 十二月"
+        # you can use the following to get 2025年 五月 二十三日 (delete only the 5月23日 section)
+        - "31# -> 三十一"
+        - "30# -> 三十"
+        - "29# -> 二十九"
+        - "28# -> 二十八"
+        - "27# -> 二十七"
+        - "26# -> 二十六"
+        - "25# -> 二十五"
+        - "24# -> 二十四"
+        - "23# -> 二十三"
+        - "22# -> 二十二"
+        - "21# -> 二十一"
+        - "20# -> 二十"
+        - "19# -> 二十九"
+        - "18# -> 二十八"
+        - "17# -> 二十七"
+        - "16# -> 二十六"
+        - "15# -> 二十五"
+        - "14# -> 二十四"
+        - "13# -> 二十三"
+        - "12# -> 二十二"
+        - "11# -> 十一"
+        - "10# -> 十"
+        - "9# -> 九"
+        - "8# -> 八"
+        - "7# -> 七"
+        - "6# -> 六"
+        - "5# -> 五"
+        - "4# -> 四"
+        - "3# -> 三"
+        - "2# -> 二"
+        - "1# -> 一"
+        # keep these at the end
+        - "! -> 年"
+        - "# ->"
+  - platform: template
+    id: dateA_text
+    name: "${friendly_name} Replacement Date A Text"
+    entity_category: diagnostic
+    update_interval: never
+    internal: true
+    filters:
+      - lambda: |-
+          // Use the format "%a" to get the short day of the week and run filters on it
+          int offset = 0;
+          // delete next 3 lines if using the HA version...
+          if (id(tzoffset_on).state != 0) {
+            offset = (int)(60 * 60 * (id(tzoffset).state));
+          }
+          std::time_t tz1time = (id(my_time).now().timestamp + offset);
+          std::tm *tz1time_astm = localtime(&tz1time);
+          char display_tmdt[20];
+          strftime(display_tmdt, 20, "%a", tz1time_astm);
+          std::string tmdt(display_tmdt);
+          return tmdt;
+      - append: ""
+      - prepend: "星期"
+      - substitute:
+        - "Sun -> 天"
+        - "Mon -> 一"
+        - "Tue -> 二"
+        - "Wed -> 三"
+        - "Thu -> 四"
+        - "Fri -> 五"
+        - "Sat -> 六"

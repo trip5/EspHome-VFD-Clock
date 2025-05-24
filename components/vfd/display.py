@@ -20,8 +20,8 @@ CODEOWNERS = ["@Trip5"]
 
 DEPENDENCIES = ["spi"]
 
-vfd8md06inkm_ns = cg.esphome_ns.namespace("vfd8md06inkm")
-VFDComponent = vfd8md06inkm_ns.class_(
+vfd_ns = cg.esphome_ns.namespace("vfd")
+VFDComponent = vfd_ns.class_(
     "VFDComponent", cg.PollingComponent, spi.SPIDevice
 )
 VFDComponentRef = VFDComponent.operator("ref")
@@ -38,14 +38,20 @@ def validate_scroll_delay(scroll_delay):
     except ValueError:
         raise cv.Invalid("Scroll delay must be two integers separated by a comma (100 to 10000 milliseconds)")
 
+def validate_optional_pin(value):
+  if value == "":
+    return None
+  return pins.gpio_output_pin_schema(value)
+
+
 CONFIG_SCHEMA = (
     display.BASIC_DISPLAY_SCHEMA.extend(
         {
             cv.GenerateID(): cv.declare_id(VFDComponent),
-            cv.Optional(CONF_RESET_PIN): pins.gpio_output_pin_schema,
-            cv.Optional(CONF_EN_PIN): pins.gpio_output_pin_schema,
+            cv.Optional(CONF_RESET_PIN): validate_optional_pin,
+            cv.Optional(CONF_EN_PIN): validate_optional_pin,
             cv.Optional(CONF_INTENSITY, default=200): cv.int_range(min=0, max=255),
-            cv.Optional(CONF_DIGITS, default=8): cv.int_range(6,8,16),
+            cv.Optional(CONF_DIGITS, default=8): cv.one_of(6, 8, 16, int=True),
             cv.Optional(CONF_SCROLL_DELAY, default="1500,500"): cv.All(cv.string, validate_scroll_delay),
             cv.Optional(CONF_REMOVE_SPACES, default=False): cv.boolean,
             cv.Optional(CONF_REPLACE_STRING, default=""): cv.string,
@@ -61,14 +67,14 @@ async def to_code(config):
     await spi.register_spi_device(var, config)
     await display.register_display(var, config)
 
-    if CONF_RESET_PIN in config:
+    if config.get(CONF_RESET_PIN) is not None:
         reset_pin = await cg.gpio_pin_expression(config[CONF_RESET_PIN])
         gpio_number = reset_pin.get_pin()
         cg.add(var.set_reset_pin(gpio_number))
     else:
-        cg.add(var.set_reset_pin(-1))
+       cg.add(var.set_reset_pin(-1))
 
-    if CONF_EN_PIN in config:
+    if config.get(CONF_EN_PIN) is not None:
         en_pin = await cg.gpio_pin_expression(config[CONF_EN_PIN])
         gpio_number = en_pin.get_pin()
         cg.add(var.set_en_pin(gpio_number))

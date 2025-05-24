@@ -1,12 +1,17 @@
 # EspHome-VFD-Clock
 
-EHVC is meant to be used on ESP-based VFD (Vaccuum Fluorescent Display) Clocks using ESPHome. So far, it works with the appropriately named VFD Clock but it can probably be adapted for use with other SPI character-display clocks (especially the Fubata 16-bit display). And, of course, it's ESPHome, so it's only limited by your imagination and skill.
+EHVC is meant to be used on ESP-based VFD (Vacuum Fluorescent Display) Clocks using ESPHome.
+So far, it works with the appropriately named VFD Clock and the LGL Studio V16
+but it can probably be adapted for use with other SPI character-display VFD clocks.
+And, of course, it's ESPHome, so it's only limited by your imagination and skill.
 
-A lot of inspiration is taken from the [`EHMTXv2`](https://github.com/lubeda/EspHoMaTriXv2) project... but with an 8-character VFD display.
+A lot of inspiration is taken from the [`EHMTXv2`](https://github.com/lubeda/EspHoMaTriXv2) project... but with a VFD display.
 
-Using this clock requires the 8-MD-06INKM display to be supported by an external component which is included in this repository. I suspect that other Futaba VFD displays can also be supported, especially if they use the Hitachi HD44780U interface.
+Using a VFD in ESPHome requires the display to be supported by an external component. 
+The one included in this repository is originally meant for the 8-MD-06INKM as used in the VFD Clock.
+It definitely supports other VFD displays that use the Hitachi HD44780U interface, including the unknown Samsung VFD as used in the LGL Studio V16.
 
-Skip down to the [Custom Component Driver](#custom-component-driver) section below if you're just here for the driver.
+Skip down to the [Custom Component Driver](#custom-component-driver) section below if you're just here for the drivers.
 
 Due to memory constraints on the ESP8266 these clocks use, I've decided to split the functions by how you may choose to use the clock.  Read below for more details.
 
@@ -22,18 +27,38 @@ These guides are proposed for the ESPHome documentation and if you find them hel
 
 Please read this: [Physically Connecting to your Device](https://esphome.io/guides/physical_device_connection).
 
-## VFD Clock
+## VFD clocks
+
+### 8-Character VFD Clock
 
 ![image](./images/VFD-Clock.jpg)
 
-This is the link on Aliexpress I have personally used but I am sure there are others:
+Here is a link on Aliexpress I have personally used but I am sure there are others:
 https://www.aliexpress.com/item/1005005899159729.html
 
+### 16-Character LGL Studio V16
+
+![image](./images/LGLStudioV16.jpg)
+
+Here is a link on Aliexpress that I have personally used:
+https://www.aliexpress.com/item/1005004267634532.html
+
+As well as a link for the original maker:
+https://lglstudio.com/products/lgl-vck-cccp-v16
+
 ### Flashing Pins
+
+#### 8-Character VFD Clock
 
 Don't forget to connect GPIO0 to GND when first connecting to your serial flasher!  You can also hold the button while powering-on.
 
 ![image](./images/VFD-Clock-Pins.jpg)
+
+#### 16-Character LGL Studio V16
+
+GPIO0 is not exposed here but it is connected to the ▲ button so hold this button while powering-on.  Dupont male ends fit nicely (as do pin headers).
+
+![image](./images/LGLStudioV16-Pins.jpg)
 
 ## Using This firmware
 
@@ -54,6 +79,10 @@ The Non-HA version will function completely without Home Assistant and can still
 
 ### Button Functions
 
+Of course, this is ESPHome, so you can change the button functions by editing the YAML if you wish.
+
+#### 8-Character VFD Clock
+
 There's only one useable button on this clock but thanks to multi-click, we can use it for a few functions.
 
 | Download Button      | Functionality                   | HA Version        |
@@ -64,7 +93,20 @@ There's only one useable button on this clock but thanks to multi-click, we can 
 | Long-press 2 seconds  | Show the clock's IP address (or other wifi status) | Toggle Time/Date Text Replacement |
 | Long-press 5 seconds | Toggle the Wifi Stop Seek on/off (see below) | Toggle Auto Replacement = Alt. Time |
 
-Of course, this is ESPHome, so you can change the button functions by editing the YAML if you wish.
+#### 16-Character LGL Studio V16
+
+Three buttons on this clock and multi-click make this clock easy to use multiple functions.
+Unfortunately, the ■ button is connected to GPIO2 which is used by the onboard LED which is needed in various other routines of the clock,
+but two buttons are still very good.
+
+| Button                  | Functionality                   | HA Version        |
+| ----------------------- | ------------------------------- | ------------------|
+| ■ Unusable              | None                            | None              |
+| ▲ Short-click           | Toggle date display mode on/off | Same              |
+| ▲ Double-click          | Toggle 12/24-hour mode on/off   | Same              |
+| ⬤ Short-click          | Toggle Time Zone Offset on/off  | Toggle Alt Time Zone |
+| ⬤ Double-click         | Show the clock's IP address (or other wifi status) | Toggle Time/Date Text Replacement |
+| ⬤ Long-press 2 seconds  | Toggle the Wifi Stop Seek on/off (see below) | Toggle Auto Replacement = Alt. Time |
 
 ### Date Display
 
@@ -78,20 +120,35 @@ Since ESPHome can't seem to use any locale for time other than English, I have a
 In the text_sensors section, you can find filters that allow substitutions.
 
 In my YAML, you will see those filters are able to localize time into Korean Hangul.  You can change this to anything you like.
-Be sure that the text to be substituted matches the output of strftime (which will be the default) and be sure to make sure any characters you need are included in the glyphs section,
-or those special characters will not be displayed!
+Be sure that the text to be substituted matches the output of strftime (which will be the default) and be sure to make sure any characters you need
+are included in the glyphs section or those special characters will not be displayed!
 
-There is also an option called Replacement Interval by which you can make your clock bilingual. It will automatically turn on/off the substitution every number of times the date is displayed, if the date is displayed.  If the date display is off, the automatic replacement will be made after the time specified by Date Display Time (multiplied by the Date Display Interval).
+There is also an option called Replacement Interval by which you can make your clock bilingual.
+It will automatically turn on/off the substitution every number of times the date is displayed, if the date is displayed.
+If the date display is off, the automatic replacement will be made after the time specified by Date Display Time (multiplied by the Date Display Interval).
 
-![image](./images/Korean-demo.gif)
+#### 8-Character Clock
 
-Check the language_filters folder for some examples.  So far there is:
+![image](./images/VFD-Clock-Korean-demo.gif)
+
+Check the [language filters](./language_filters/) folder for some examples.  So far there is:
 [`Korean`](language_filters/Korean.yaml) &
 [`French`](language_filters/French.yaml) &
 [`Greek`](language_filters/Greek.yaml) &
 [`Chinese`](language_filters/Chinese.yaml)
 
-Please note that because this clock does not use fonts, you may have to design your own.  The function to create your own characters is part of the VFD custom component.
+#### 16-Character Clock
+
+![image](./images/LGLStudioV16-Chinese-demo.gif)
+
+Check the [language filters](./language_filters/) folder for some examples.  So far there is:
+[`Korean`](language_filters/Korean_16.yaml) &
+[`French`](language_filters/French_16.yaml) &
+[`Greek`](language_filters/Greek_16.yaml) &
+[`Chinese`](language_filters/Chinese_16.yaml)
+
+Please note that because this clock does not use fonts, you may have to design your own.
+The function to create your own characters is part of the VFD custom component.
 Read more in the [Custom Component Driver](#custom-component-driver) section.
 
 ### Time Sync
@@ -100,7 +157,8 @@ Time can be synced to the Internet at configurable intervals between 1 - 24 hour
 
 ## Non-HA Version
 
-The file [`EHVClock.yaml`](EHVClock.yaml) contains functions useful for using the clock as... mostly just a clock but with some power-saving functions.
+The files [`EHVClock.yaml`](EHVClock.yaml) and [`EHVClock_LGLV16.yaml`](EHVClock_LGLV16.yaml) contains functions useful for using the clock as...
+mostly just a clock but with some power-saving functions.
 It includes all of the functions above as well as these below.  This version has a WebUI which can be accessed via it's IP after connecting the clock to Wifi.
 So if you need a travel clock, this may be the ideal one for you.  It can still be controlled by Home Assistant as well but is not dependent on it to function.
 
@@ -112,7 +170,8 @@ with the display always-on.  Take a look at power consumption in the [Power Cons
 It's up to you how to handle time offset.  It will affect the main time zone as well as the alternate time zone
 You can set an offset with a number that is a positive or negative value with decimal places (ie. 2, -2, 12.5).
 
-I have allowed steps of 0.25 (equal to 15 minutes) but I notice ESPHome does not enforce those steps. It is possible to set an offset like 0.01 (which would be 36 seconds).
+I have allowed steps of 0.25 (equal to 15 minutes) but I notice ESPHome does not enforce those steps.
+It is possible to set an offset like 0.01 (which would be 36 seconds).
 Be careful.
 
 ### Wifi Stop Seek
@@ -142,7 +201,7 @@ The other is to turn off the display when there is no Wifi connection (in second
 
 ### Power Consumption
 
-*2024.11.11 Version, 1 hour each mode, measured with a FNIRSI FNB-58 powered externally*
+*8-Character VFD Clock, 2024.11.11 Version, 1 hour each mode, measured with a FNIRSI FNB-58 powered externally*
 
 | Status: Modes                                        | Power usage |
 | ---------------------------------------------------- | ----------- |
@@ -155,9 +214,9 @@ The other is to turn off the display when there is no Wifi connection (in second
 
 #### What Does This Mean?
 
-On maximum power savings, you could power the clock from a 5000mAh powerbank for a day and a bit: `5000mAh / 143mA ≈ 34.9 hours`...
+On maximum power savings, you could power the 8-Character clock from a 5000mAh powerbank for a day and a bit: `5000mAh / 143mA ≈ 34.9 hours`...
 
-This is **NOT** a power-efficient clock.  If you would like a clock that consumes less power, I'd recommend something that uses an LED Display like [EspHome-Led-Clock](https://github.com/trip5/EspHome-Led-Clock) or [EspHome-Led-PixelClock](https://github.com/trip5/EspHome-Led-PixelClock).
+Vacuum Fluorescent Displays are **NOT** power-efficient.  If you would like a clock that consumes less power, I'd recommend something that uses an LED Display like [EspHome-Led-Clock](https://github.com/trip5/EspHome-Led-Clock) or [EspHome-Led-PixelClock](https://github.com/trip5/EspHome-Led-PixelClock).
 
 ### LED Output
 
@@ -187,7 +246,8 @@ It seems to work fine when viewing on a computer or an Apple phone. If you have 
 
 ## Home Assistant Version
 
-The file [`EHVClock-HA.yaml`](EHLClock-HA.yaml) contains functions useful for using the clock with Home Assistant.
+The file [`EHVClock-HA.yaml`](EHVClock-HA.yaml) and [`EHVClock_LGLV16-HA.yaml`](EHVClock_LGLV16-HA.yaml)
+contain functions useful for using the clock with Home Assistant.
 It does not include the WebUI, Time Zone Offset, or Wifi Stop Seek but it does includes all of the functions below.
 
 ### Alternate Time Zone
@@ -229,7 +289,7 @@ Anything in `configuration.yaml` under the `template:` heading must now be moved
 The file [`template.yaml`](template.yaml) contains several examples how to add sensors that can be automatically shown by the clock.
 I personally use only one sensor in my Home Assistant and 2 clocks in the house get data from the same sensor but you can (of course) create a sensor for each  individual clock.
 
-### Notice Regarding Flash Size
+### Notice Regarding Flash Size of 8-Character Clock
 
 It has come to my attention that certain clocks have what could be a fake ESP-12H stamp on the back.  My clocks all have an ESP-12F (an "upgraded" version of the ESP-12E) with 4M of flash memory. An ESP-12H should have 2M of flash but these only have 1M of flash memory! They look like this:
 
@@ -249,16 +309,38 @@ Please note that to be 100% certain of this, you may need to use [esptool](https
 esptool.py -p PORT flash_id
 ```
 
+It may also be necessary to erase the flash before re-flashing (this can fix many problems):
+
+```
+esptool.py -p PORT erase_flash
+```
+
+### Notice Regarding the LGL Studio V16
+
+I do not have a character table for the Unknown Samsung display used in this clock.  That makes replacements impossible for now.
+I will improve the documentation regarding the special characters in the ASCII 128-255 range in a future update.
+
+There is a speaker on GPIO12.  Alarms may be implemented in a future update.
+
 ## Custom Component Driver
 
-I could not find any custom component to support the VFD 8-MD-06INKM Display that is part of this clock.  I found more than a few Micropython and
+### VFD / 8-MD-06INKM / HD44780
+
+I could not find any custom component to support the Futaba 8-MD-06INKM Display that is part of the VFD Clock.  I found more than a few Micropython and
 Arduino drivers including [sfxfs's driver](https://github.com/sfxfs/ESP32-VFD-8DM-Arduino/) which formed the foundation of the lower functions of my driver
 I also had to look at the official drivers for [Max7219](https://esphome.io/api/max7219_8cpp_source) and [Max7219Digit](https://esphome.io/api/max7219digit_8cpp_source) because this clock includes both inbuilt fonts and the ability to use the dot-matrix.
 
-This driver may actually support more Futaba VFDs than the 8-MD-06INKM, but certain parts may need updating to function correctly.
+This driver supports more than just VFDs than the 8-MD-06INKM, but certain parts may need updating to function correctly.
+The reason it can be used for other displays is because most VFDs adhere to the Hitachi HD44780 standard (except for higher-byte characters),
+including the 16-character Samsung (model unknown) used in the LGL Studio V16. 
 
-Please note also some of the sections of this driver are untested. For example, the displays have a reset pin and I'm not entirely certain what it actually does,
-despite being in the code.  The connection exists as a solder point on the VFD Clock but it is open.
+Please note also some of the sections of this driver are untested.
+For example, the 8-MD-06INKM display has a reset pin and I'm not entirely certain what it actually does, despite being in the code.
+The connection exists as a solder point on the VFD Clock but it is open.
+I'm guessing the pin is pulled high to achieve its function (perhaps clearing custom characters in the CGRAM and/or blanking the display).
+
+The ability to use an EN pin has also been put into the driver code as well.  This GPIO is assumed to be high to power the display.
+Again, this function is untested.
 
 ### Characters
 
@@ -276,27 +358,27 @@ external_components:
       url: https://github.com/trip5/vfdclock
       ref: main
     refresh: 60s
-    components: [ vfd8md06inkm ]
+    components: [ vfd ]
 
 spi:
   clk_pin: GPIO12
   mosi_pin: GPIO14
 
 display:
-  - platform: vfd8md06inkm
+  - platform: vfd
     id: vf_display
     cs_pin: GPIO13
     update_interval: 1s # optional (ESPHome default: 1s)
     reset_pin: GPIO15 # optional, attached to reset pin of display (default: unused)
     en_pin: GPIO10 # optional, provides power to display (default: unused)
     intensity: 200 # optional, initial brightness 0 to 255 (default: 200)
-    digits: # optional 6, 8 and 16 possible but have not been tested (default: 8)
+    digits: 8 # optional, can be 6, 8 or 16 (default: 8) (6 has not be tested)
     scroll_delay: "500, 500" # optional initial & subsequent delays when scrolling (in milliseconds) (default: 1500, 500) (first text = both numbers combined)
     remove_spaces: "true" # optional, remove leading or trailing spaces (default: false)
-    # Replace characters: Unicode character:Fubata byte (characters that already exist on the device, can use decimal, hex, or binary in MSB-LSB order)
-    replace: "°:0b11101111"
-    # Custom characters: Unicode character:column1,column2,column3,column4,column5 (binary painting from bottom to top)
-    custom: "₿:62,107,42,107,20"
+    # Replace characters: Unicode character:Fubata byte (character that already exists on the device: ASCII, decimal, hex, or binary in MSB-LSB order)
+    replace: °:0b11101111,ü:0x81;Ä:142;ä:a;
+    # Custom characters: Unicode character:column1,column2,column3,column4,column5 (binary painting from bottom to top: can be in decimal or hex too)
+    custom: "₿:0b0111110,0b1101011,0b0101010,0b1101011,0b0010100;°:0,6,9,9,6;"
 ```
 
 The following functions are available as lambdas:
@@ -318,6 +400,7 @@ it.strftime(const char *format, ESPTime time) __attribute__((format(strftime, 2,
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2025.05.24 | Added YAMLs for LGL Studio V16, language_filters hugely improved |
 | 2024.12.09 | Recoded to remove many global variables, relying on numbers and switches where possible, hard-coded variables removed |
 | 2024.11.11 | Display Off routine fix, power measurements complete |
 | 2024.10.29 | 2 variables in regular version now hard-coded, should free up more memory for custom characters |
@@ -327,6 +410,7 @@ it.strftime(const char *format, ESPTime time) __attribute__((format(strftime, 2,
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2025.05.24 | Component renamed to 'vfd', re-factored to fix 8 custom characters (previously 7), fixed `digits` to accept 6 or 8 or 16, `reset_pin` and `en_pin` will accept "", replace can be ASCII |
 | 2024.12.09 | Scroll text initial delay fix (initial delay was starting without displaying) |
 | 2024.10.26 | Support for Futaba 8-MD-06INKM display |
 
@@ -343,9 +427,13 @@ Some spec sheets on other Fubata displays can be found here: https://www.datashe
 
 One of many Chinese Micropython programs here: https://www.eeworld.com.cn/RDesigns_detail/61016
 
+Samsung 16... here?
+https://www.datasheetarchive.com/datasheet/17818001743f3ffd?type=P
+https://www.alldatasheet.com/datasheet-pdf/download/110463/SAMSUNG/16L102DA4.html
+
 ### RX8025 RTC
 
-This clock also made the unusual choice to use an RX8025 RTC.  I made an ESPHome Component for that too!
+These clocks both made the unusual choice to use an RX8025 RTC.  I made an ESPHome Component for that too!
 
 It's here: https://github.com/trip5/esphome-rx8025
 

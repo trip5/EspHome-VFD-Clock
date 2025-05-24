@@ -17,13 +17,19 @@ I've included the ability to use whichever numbering scheme you prefer.  Decimal
 number prefixes if using hex (0x) or binary (0b).  If you see something weird, you probably forgot the prefix!
 
 It also should work for other compatible displays, provided you specify the right replacement byte.
-Every Futaba VFD display uses a different set of characters.
+Every VFD display uses a different set of characters.
 
 But, there are more than a few characters missing. Of course there are.  The display is limited to 8-bit bytes.
 
+You can also just swap letters with ASCII characters in the range of 33 to 126 (un-accented latin and printable characters) as such:
+
+```
+  replace: "Ä:A;ä:a;Ö:O;ö:o;Ü:U,ü:u"
+```
+
 ## How to Create Custom Characters
 
-Futaba VFDs all seem to reserve the first 8 bits to allow customized characters to be displayed. But first they need to be loaded into one of 8 CGRAM slots.
+Most VFDs all seem to reserve the first 8 bits to allow customized characters to be displayed. But first they need to be loaded into one of 8 CGRAM slots.
 My driver will allow those slots to be used dynamically, depending on what character you would like to display.
 You are NOT limited to 8 characters total (but the display is limited to 8 characters, so hopefully no problem).
 
@@ -44,12 +50,12 @@ number prefixes if using hex (0x) or binary (0b).  If you see something weird, y
 
 Here and in the YAML are examples to use the Bitcoin symbol and certain Korean Hangul characters:
 ```
-custom: "₿:62,107,42,107,20;금:117,85,85,85,119;목:55,53,61,53,119;수:20,18,113,18,20;오:34,37,61,37,34;요:34,61,37,61,34;월:38,45,102,72,95;일:18,21,114,64,71;전:121,71,89,68,95;토:95,85,117,85,81;화:22,123,22,127,8;후:38,42,107,42,38"
+custom: "₿:62,107,42,107,20;금:117,85,85,85,119;목:55,53,61,53,119;수:20,18,113,18,20;오:34,37,61,37,34;요:34,61,37,61,34;월:38,45,102,72,95;일:18,21,114,64,71;전:121,71,89,68,95;토:95,85,117,85,81;화:22,123,22,127,8;후:38,42,107,42,38;년:31,112,90,74,95"
 ```
 
 Here is the original binary (quite a bit longer!):
 ```
-custom: "₿:0b0111110,0b1101011,0b0101010,0b1101011,0b0010100;금:0b1110101,0b1010101,0b1010101,0b1010101,0b1110111;목:0b0110111,0b0110101,0b0111101,0b0110101,0b1110111;수:0b0010100,0b0010010,0b1110001,0b0010010,0b0010100;오:0b0100010,0b0100101,0b0111101,0b0100101,0b0100010;요:0b0100010,0b0111101,0b0100101,0b0111101,0b0100010;월:0b0100110,0b0101101,0b1100110,0b1001000,0b1011111;일:0b0010010,0b0010101,0b1110010,0b1000000,0b1000111;전:0b1111001,0b1000111,0b1011001,0b1000100,0b1011111;토:0b1011111,0b1010101,0b1110101,0b1010101,0b1010001;화:0b0010110,0b1111011,0b0010110,0b1111111,0b0001000;후:0b0100110,0b0101010,0b1101011,0b0101010,0b0100110"
+custom: "₿:0b0111110,0b1101011,0b0101010,0b1101011,0b0010100;금:0b1110101,0b1010101,0b1010101,0b1010101,0b1110111;목:0b0110111,0b0110101,0b0111101,0b0110101,0b1110111;수:0b0010100,0b0010010,0b1110001,0b0010010,0b0010100;오:0b0100010,0b0100101,0b0111101,0b0100101,0b0100010;요:0b0100010,0b0111101,0b0100101,0b0111101,0b0100010;월:0b0100110,0b0101101,0b1100110,0b1001000,0b1011111;일:0b0010010,0b0010101,0b1110010,0b1000000,0b1000111;전:0b1111001,0b1000111,0b1011001,0b1000100,0b1011111;토:0b1011111,0b1010101,0b1110101,0b1010101,0b1010001;화:0b0010110,0b1111011,0b0010110,0b1111111,0b0001000;후:0b0100110,0b0101010,0b1101011,0b0101010,0b0100110;년:0b0011111,0b1110000,0b1011010,0b1001010,0b1011111"
 ```
 
 Since the syntax of this uses a colon, you can replace the colon itself by simply not specifying a character to replace:
@@ -72,14 +78,6 @@ Although I have used Korean on my clock, this is a fairly limited character set.
 that are checked for each and every character to be printed to the display. The VFD Clock runs on an ESP-12. It's not exactly top-of-the-line.
 Add a few characters at a time and be sure that your clock isn't significantly slowing down, especially if you are display seconds.
 I have not tested it with more than 30 characters total.
-
-### Mass Conversion of Numbers / A Warning About ChatGPT
-
-I tried using ChatGPT to convert the Korean binary codes to decimal to save space in my YAML. It made mistakes. Seriously...?
-
-If you have many binary numbers to convert try: https://www.convzone.com/binary-to-decimal/
-
-This one is also useful: https://www.mathsisfun.com/binary-decimal-hexadecimal-converter.html
 
 ## Character Tables
 
@@ -104,6 +102,10 @@ Fat colon:
 ```
 :0,54,54,0,0;
 ```
+Thin colon:
+```
+:0,0,20,0,0;
+```
 Round degree:
 ```
 °:0,6,9,9,6;
@@ -115,3 +117,14 @@ Round degree:
 ₿:62,107,42,107,20;₩:63,100,60,100,63;
 ```
 
+### Helpers
+
+If you have many binary numbers to convert try: https://www.convzone.com/binary-to-decimal/
+
+This one is also useful: https://www.mathsisfun.com/binary-decimal-hexadecimal-converter.html
+
+Hopefully OnlineGDB hosts this [`Glyphs Helper`](https://www.onlinegdb.com/fork/zh1VszNT1) for a long while. This can help when making a list of unique characters.
+
+### A Warning About ChatGPT
+
+I tried using ChatGPT to convert the Korean binary codes to decimal to save space in my YAML. It made mistakes. Seriously...?

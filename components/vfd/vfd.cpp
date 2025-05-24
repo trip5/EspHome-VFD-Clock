@@ -1,4 +1,4 @@
-#include "vfd8md06inkm.h"
+#include "vfd.h"
 #include "esphome/core/log.h"
 #include "esphome/core/helpers.h"
 #include "esphome/core/hal.h"
@@ -16,9 +16,9 @@
 // Please note some of the sections of this driver are untested...
 
 namespace esphome {
-namespace vfd8md06inkm {
+namespace vfd {
 
-static const char *const TAG = "vfd8md06inkm";
+static const char *const TAG = "vfd";
 static const char *VFD_TAG = "VFD";
 
 static const uint8_t DCRAM_DATA_WRITE = 0x20;
@@ -55,7 +55,7 @@ void VFDComponent::setup() // from void VFD_Display::init() const
 
 /// @brief Dump the configured settings to the log
 void VFDComponent::dump_config() {
-  ESP_LOGCONFIG(TAG, "VFD 8-MD-06INKM:");
+  ESP_LOGCONFIG(TAG, "VFD:");
   ESP_LOGCONFIG(TAG, "  Intensity: %u", this->intensity_);
   //LOG_PIN("  CLK Pin: ", this->clk_pin_);
   //LOG_PIN("  SDI Pin: ", this->sdi_pin_);
@@ -193,37 +193,47 @@ void VFDComponent::update()
 void VFDComponent::loop()
 {
   // Check if we are in scrolling mode
-  if (this->is_scrolling_) 
+  if (this->is_scrolling_)
   {
     // Check if it's time to update the display
     // due to the way this works, first text is actually displayed for time of initial delay + subsequent delay...
-    if (millis() - this->last_update_time_ >= (this->scroll_index_ == 0 ? this->initial_delay_ : this->subsequent_delay_)) 
+    if (millis() - this->last_update_time_ >= (this->scroll_index_ == 0 ? this->initial_delay_ : this->subsequent_delay_))
     {
-      std::string display_text;
-      int total_length = this->scroll_text_.length();
+      std::vector<uint16_t> display_text;
+      int total_length = this->scroll_text_.size();  // use size(), not length()
+
       // Extract the current scroll text
-      if (this->scroll_index_ + this->digits_ <= total_length) 
+      if (this->scroll_index_ + this->digits_ <= total_length)
       {
-        display_text = this->scroll_text_.substr(this->scroll_index_, this->digits_);
-      } 
-      else 
-      {
-        display_text = this->scroll_text_.substr(this->scroll_index_) + this->scroll_text_.substr(0, (this->scroll_index_ + this->digits_) - total_length);
+        display_text = std::vector<uint16_t>(
+          this->scroll_text_.begin() + this->scroll_index_,
+          this->scroll_text_.begin() + this->scroll_index_ + this->digits_);
       }
-      // Convert to const char* and display
-      const char* scroll_str = display_text.c_str();
-      show(0, scroll_str); // Display the extracted string
+      else
+      {
+        // Wrap around case: take from scroll_index_ to end, then from start to needed amount
+        display_text = std::vector<uint16_t>(
+          this->scroll_text_.begin() + this->scroll_index_,
+          this->scroll_text_.end());
+
+        display_text.insert(
+          display_text.end(),
+          this->scroll_text_.begin(),
+          this->scroll_text_.begin() + (this->scroll_index_ + this->digits_ - total_length));
+      }
+      show(0, display_text); // Display the extracted string
       this->last_update_time_ = millis(); // Update last update time
       // Move to the next position
       this->scroll_index_++;
       // Reset the index if we reach the end
-      if (this->scroll_index_ >= total_length) 
+      if (this->scroll_index_ >= total_length)
       {
         this->scroll_index_ = 0; // Restart scrolling from the beginning
       }
     }
   }
 }
+
 
 /// @brief Function to clear the entire display
 void VFDComponent::clearscreen() // void VFD_Display::clear() const
@@ -251,29 +261,27 @@ void VFDComponent::clear(char bit)
 /// @brief Function to print individual bits to the display
 /// @param bit The position where the character will be printed
 /// @param chr The character to display
-void VFDComponent::show(char bit, char chr)
+void VFDComponent::show(char bit, uint16_t chr)
 {
-  if (chr > 255) { chr -= 256; } // if Chr is greater than 255, it's a custom character so subtract 256 to get the original cgram_flag (0 makes issues)
-  setCmd(DCRAM_DATA_WRITE | bit, (byte)chr);
+  if (chr >= 256 && chr <= 263)
+  {
+    chr -= 256;  // Custom CGRAM char
+  }
+  setCmd(DCRAM_DATA_WRITE | bit, static_cast<uint8_t>(chr));
 }
-
 
 /// @brief Function to display a string on the VFD
 /// @param bit The position where the first character will be displayed
 /// @param str The string to be displayed
-void VFDComponent::show(char bit, std::string str)
+void VFDComponent::show(char bit, const std::vector<uint16_t> &str)
 {
-  for (size_t i = 0; i < str.length(); i++)
+  for (size_t i = 0; i < str.size(); i++)
   {
-    show(bit, str[i]); // Access character directly using []
+    show(bit, str[i]); // Overload show() to accept uint16_t
     if (bit < this->digits_ - 1)
-    {
       bit += 1;
-    }
     else
-    {
       break;
-    }
   }
 }
 
@@ -364,7 +372,7 @@ void VFDComponent::write_cust_data(char cgram_flag, const byte *data) // The dat
   }
   else
   {
-    ESP_LOGE(VFD_TAG, "Out of DCRAM storage space!");
+    ESP_LOGE(VFD_TAG, "DCRAM storage space limit reached!");
   }
 }
 
@@ -383,15 +391,14 @@ void VFDComponent::setCmd(byte cmd, byte data)
 /// @param &&writer A lambda function or callable that takes a reference to the VFDComponent and writes data to the display
 void VFDComponent::set_writer(vfd_writer_t &&writer) { this->writer_ = writer; }
 
-/// @brief Print to the display starting at a certain position
+/// @brief Print to the display starting at a certain position (Processed but will not center text or put longer text in the scroll buffer)
 /// @param start_pos Starting position (0 to max digits -1)
 /// @param str The string to print
-/// @return 0 = success
+/// @return How many characters successfully printed
 uint8_t VFDComponent::print(uint8_t start_pos, const char* str)
 {
-  std::string temp = process_string(str);
-  show(start_pos, temp.c_str());
-  return 0;
+  std::vector<uint16_t> processed = process_string(str);  // Process the C-string into vector<uint16_t>
+  return this->print(start_pos, processed);   // Send to the new vector overload that handles truncation and printing
 }
 
 /// @brief Print to the display (Processed: will center short text, put longer text in the scroll buffer)
@@ -399,33 +406,60 @@ uint8_t VFDComponent::print(uint8_t start_pos, const char* str)
 /// @return How many characters successfully printed
 uint8_t VFDComponent::print(const char *str)
 {
-  std::string temp = process_string(str);
-  if (this->print_str_ != temp) // Check if the new string is different
+  return this->print(process_string(str));
+}
+
+/// @brief Print to the display starting at a certain position (Processed but will not center text or put longer text in the scroll buffer)
+/// @param start_pos Starting position (0 to max digits -1)
+/// @param processed A vector of character codes (UTF-8, replacements, custom characters) to print
+/// @return How many characters successfully printed
+uint8_t VFDComponent::print(uint8_t start_pos, const std::vector<uint16_t>& processed)
+{
+  size_t available = (start_pos < this->digits_) ? (this->digits_ - start_pos) : 0;   // Calculate available space from start_pos to end of display digits
+  if (available == 0) // If no space, nothing to print
+    return 0;
+  std::vector<uint16_t> truncated(processed.begin(), processed.begin() + std::min(processed.size(), available)); // Truncate if longer than available space
+  show(start_pos, truncated); // Show the truncated string starting at start_pos
+  this->is_scrolling_ = false; // Reset scrolling, not scrolling when position is specified
+  this->print_str_ = truncated; // Store what we printed so the component can track state if needed
+  return truncated.size();
+}
+
+/// @brief Print to the display (Processed: will center short text, put longer text in the scroll buffer)
+/// @param processed A vector of character codes (UTF-8, replacements, custom characters) to print
+/// @return How many characters successfully printed
+uint8_t VFDComponent::print(const std::vector<uint16_t> &processed)
+{
+  if (this->print_str_ != processed) // Check if the new string is different
   {
     this->is_scrolling_ = false; // Reset scrolling flag
-    this->print_str_ = temp;
-    if (temp.length() <= this->digits_) // If the string is shorter or equal to max digits, center it
+    this->print_str_ = processed;
+    if (processed.size() <= this->digits_) // If the string is shorter or equal to max digits, center it
     {
-      size_t pad_front = (this->digits_ - temp.length()) / 2; // Calculate spaces added to front
-      size_t pad_back = (this->digits_ - temp.length()) - pad_front; // Back gets the extra space if odd
-      temp.insert(0, pad_front, ' '); // Insert spaces at the front
-      temp.append(pad_back, ' '); // Append spaces at the back
-      show(0, temp.c_str()); // Display centered string
+      size_t pad_front = (this->digits_ - processed.size()) / 2; // Calculate spaces added to back
+      size_t pad_back = this->digits_ - processed.size() - pad_front; // Front gets the extra space if odd
+      std::vector<uint16_t> padded;
+      padded.insert(padded.end(), pad_front, ' '); // Insert spaces at the front
+      padded.insert(padded.end(), processed.begin(), processed.end());
+      padded.insert(padded.end(), pad_back, ' '); // Append spaces at the back
+      show(0, padded); // Display centered string
     }
     else // Handle scrolling for strings longer than max digits
     {
-      temp += " "; // Add a space at the end for scrolling
-      this->scroll_text_ = temp; // Store the scroll text for scrolling
+      std::vector<uint16_t> scroll_text = processed;
+      scroll_text.push_back(' '); // Add a space at the end for scrolling
+      this->scroll_text_ = scroll_text; // Store the scroll text for scrolling
       this->scroll_index_ = 0; // Reset scroll index
       this->is_scrolling_ = true; // Set scrolling flag
       this->last_update_time_ = millis(); // Initialize last update time
-      show(0, temp.substr(0, this->digits_).c_str()); // Display first part of text
+      std::vector<uint16_t> slice(scroll_text.begin(), scroll_text.begin() + this->digits_);
+      show(0, slice); // Display first part of text
     }
   }
-  return 0; // Function complete
+  return 0;
 }
 
-/// @brief Print a formatted string to the display starting at a certain position
+/// @brief Print a formatted string to the display starting at a certain position (Processed but will not center text or put longer text in the scroll buffer)
 /// @param pos Starting position (0 to max digits -1)
 /// @param format The string to print, which includes standard format specifiers (%d, %s, %c, etc.)
 /// @param ... Variadic arguments corresponding to the format string
@@ -439,13 +473,13 @@ uint8_t VFDComponent::printf(uint8_t pos, const char *format, ...)
   va_end(arg);
   if (ret > 0)
   {
-    std::string processed_string = process_string(buffer); // Process the string
-    return this->print(pos, processed_string.c_str()); // Print the processed string
+    std::vector<uint16_t> processed = process_string(buffer); // Process the string
+    return this->print(pos, processed);  // Delegate to proper print()
   }
   return 0;
 }
 
-/// @brief Print a formatted string to the display
+/// @brief Print a formatted string to the display (Processed: will center short text, put longer text in the scroll buffer)
 /// @param format The string to print, which includes standard format specifiers (%d, %s, %c, etc.)
 /// @param ... Variadic arguments corresponding to the format string
 /// @return The number of characters successfully printed to the display
@@ -458,16 +492,15 @@ uint8_t VFDComponent::printf(const char *format, ...)
   va_end(arg);
   if (ret > 0)
   {
-    std::string processed_string = process_string(buffer); // Process the string
-    return this->print(processed_string.c_str()); // Print the processed string
+    std::vector<uint16_t> processed = process_string(buffer);
+    return this->print(processed);  // Delegate to print() for centering/scrolling logic
   }
   return 0;
 }
 
-/// @brief Print a formatted time to the display starting at a specific position
+/// @brief Print a formatted time to the display starting at a specific position (Processed but will not center text or put longer text in the scroll buffer)
 /// @param pos Starting position (0 to max digits -1)
 /// @param format The format string that follows the `strftime` format conventions (%Y for year, %m for month, etc.)
-/// @param ... consult ESPHome's strftime documentation for more information 
 /// @param time The time value of type `ESPTime` to be formatted and printed
 /// @return The number of characters successfully printed to the display.
 uint8_t VFDComponent::strftime(uint8_t pos, const char *format, ESPTime time)
@@ -476,30 +509,27 @@ uint8_t VFDComponent::strftime(uint8_t pos, const char *format, ESPTime time)
   size_t ret = time.strftime(buffer, sizeof(buffer), format);
   if (ret > 0)
   {
-    std::string processed_string = process_string(buffer); // Process the string
-    return this->print(pos, processed_string.c_str()); // Print the processed string
+    std::vector<uint16_t> processed = process_string(buffer); // Process the string
+    return this->print(pos, processed); // Print the processed string
   }
   return 0;
 }
 
-/// @brief Print a formatted time to the display
-/// @param format The format string that follows the `strftime` format conventions (%Y for, %m for month, etc.)
-/// @param ... consult ESPHome's strftime documentation for more information 
+/// @brief Print a formatted time to the display (Processed: will center short text, put longer text in the scroll buffer)
+/// @param format The format string that follows the `strftime` format conventions (%Y for year, %m for month, etc.)
 /// @param time The time value of type `ESPTime` to be formatted and printed
 /// @return The number of characters successfully printed to the display.
-uint8_t VFDComponent::strftime(const char *format, ESPTime time) { return this->strftime(0, format, time); }
-
-/// @brief Set how many digits the display has (8 or 16)
-/// @param digits 6 or 8 or 16
-void VFDComponent::set_digits(uint8_t digits) { this->digits_ = digits; }
-
-/// @brief Set the pin attached to the Reset pin of the display
-/// @param reset_pin Pin number (not GPIO)
-void VFDComponent::set_reset_pin(int8_t reset_pin) { this->reset_pin_ = reset_pin; }
-
-/// @brief Set the EN Pin which supplies power to the display
-/// @param en_pin Pin number (not GPIO)
-void VFDComponent::set_en_pin(int8_t en_pin) { this->en_pin_ = en_pin; }
+uint8_t VFDComponent::strftime(const char *format, ESPTime time)
+{
+  char buffer[64];
+  size_t ret = time.strftime(buffer, sizeof(buffer), format);
+  if (ret > 0)
+  {
+    std::vector<uint16_t> processed = process_string(buffer); // Process the string
+    return this->print(processed);  // Let the print logic decide to scroll or center
+  }
+  return 0;
+}
 
 /// @brief Sets the delay times for scroll speed
 /// @param initial_delay, subsequent_delay in milliseconds
@@ -507,16 +537,6 @@ void VFDComponent::set_scroll_delays(uint16_t initial_delay, uint16_t subsequent
 {
   this->initial_delay_ = initial_delay;
   this->subsequent_delay_ = subsequent_delay;
-}
-
-/// @brief Set to true to remove leading or trailing spaces from the printed string
-/// @param remove_spaces false (default) or true
-void VFDComponent::set_remove_spaces(bool remove_spaces) { this->remove_spaces_ = remove_spaces; }
-
-/// @brief Set the string obtained from replace: "" in the YAML
-/// @param replace_string The string to be parsed
-void VFDComponent::set_replace_string(const std::string &replace_string) { 
-    this->replace_string_ = replace_string; 
 }
 
 /// @brief Parses the string obtained from replace: "" in the YAML
@@ -540,19 +560,20 @@ void VFDComponent::add_replacement_pair(const std::string &pair) {
   if (colon_index != std::string::npos) {
     std::string char_from = pair.substr(0, colon_index);
     std::string value_str = pair.substr(colon_index + 1);
-    int16_t char_to = convert_to_byte(value_str);
+    int16_t char_to = -1;
+    // Check if value_str is a single printable ASCII character (33 to 126)
+    if (value_str.length() == 1 && value_str[0] >= 33 && value_str[0] <= 126) {
+      char_to = static_cast<uint16_t>(value_str[0]);
+    } else {
+      // Else, try to convert as binary, hex, or decimal
+      char_to = convert_to_byte(value_str);
+    }
     if (char_to != -1)  // Only add if conversion was successful
     {
       this->replace_from_.push_back(char_from);
       this->replace_to_.push_back(static_cast<uint16_t>(char_to));
     }
   }
-}
-
-/// @brief Set the string obtained from custom: "" in the YAML
-/// @param custom_string The string to be parsed
-void VFDComponent::set_custom_string(const std::string &custom_string) { 
-    this->custom_string_ = custom_string; 
 }
 
 /// @brief Parses the string obtained from custom: "" in the YAML
@@ -598,10 +619,8 @@ void VFDComponent::add_custom_pair(const std::string &entry) {
         custom_values[index] = value; // Store the valid byte
         ++index;
       }
-
       byte_start = byte_end + 1;
     }
-
     // Handle the last byte entry if it exists
     if (byte_start < bytes.length() && index < 5) {
       std::string byte_str = bytes.substr(byte_start);
@@ -611,15 +630,12 @@ void VFDComponent::add_custom_pair(const std::string &entry) {
         ++index;
       }
     }
-
     // Add the character to the custom_from_ array
     this->custom_from_.push_back(char_from);
     // Add the corresponding bytes to the custom_to_ array
     custom_to_.push_back(std::vector<byte>(custom_values, custom_values + index)); // Store the valid bytes
   }
 }
-
-
 
 /// @brief Converts a string representing a number in binary, hex, or decimal format to a byte (uint16_t)
 /// @param value_str The string representation of the number
@@ -692,12 +708,13 @@ int16_t VFDComponent::convert_to_byte(const std::string &value_str)
 /// @brief This processes a string (heavily) for the print functions, according to settings in the YAML
 /// ... spaces can be removed, replacements can be made, custom can be characters used
 /// @param str a const char string to be processed
-/// @return A processed std::string that may include removed spaces, applied replacements, custom character substitutions
-std::string VFDComponent::process_string(const char *str)
+/// @return A processed std::vector<uint16_t> that may include removed spaces, applied replacements, custom character substitutions
+std::vector<uint16_t> VFDComponent::process_string(const char *str)
 {
   std::string temp(str); // Convert to std::string for easier manipulation
-  std::string result; // To hold the processed result
-  char cgram_flag = 1; // Initialize cgram_flag to 0
+  std::vector<uint16_t> result; // To hold the processed result
+  char cgram_flag = 0; // Initialize cgram_flag to 0
+  std::map<std::string, uint8_t> assigned_custom_chars; // so we can re-use characters already assigned
   if (this->remove_spaces_) // Remove spaces if needed
   {
     temp.erase(temp.begin(), std::find_if(temp.begin(), temp.end(), [](unsigned char ch) {
@@ -796,26 +813,38 @@ std::string VFDComponent::process_string(const char *str)
     {
       if (this->replace_from_[j] == utf8_char)
       {
-        result += static_cast<char>(this->replace_to_[j]); // Add the replacement byte to the result
+        result.push_back(static_cast<uint16_t>(this->replace_to_[j])); // Add the replacement byte to the result
         replaced = true;
         break; // Stop after the first replacement
       }
     }
-    // Check for custom characters
+
+    // Check for custom character to add to DRAM
     if (!replaced && cgram_flag <= 7)
     {
       for (size_t j = 0; j < this->custom_from_.size(); ++j)
       {
         if (this->custom_from_[j] == utf8_char)
         {
-          result += static_cast<char>(cgram_flag + 256); // Replace with the cgram_flag (0 to 7) + 256 (will be handled by show)
-          replaced = true;
-          // Send the custom values associated with this cgram_flag
+          // Check if already assigned
+          auto it = assigned_custom_chars.find(utf8_char);
+          if (it != assigned_custom_chars.end())
+          {
+            // Reuse previously assigned CGRAM slot + 256 (will be handled by show)
+            result.push_back(static_cast<uint16_t>(it->second + 256));
+            replaced = true;
+            break;
+          }
+          // ...or assign a new CGRAM slot
           if (j < this->custom_to_.size()) // Ensure index is valid
           {
             const std::vector<uint8_t>& custom_values = this->custom_to_[j];
             write_cust_data(cgram_flag, custom_values.data()); // Send the custom values
+            assigned_custom_chars[utf8_char] = cgram_flag; // Record assignment
+            result.push_back(static_cast<uint16_t>(cgram_flag + 256)); // Replace with the cgram_flag (0 to 7) + 256 (will be handled by show)
+            ESP_LOGD(VFD_TAG, "DCRAM storage slot %d assigned for '%s'", cgram_flag, utf8_char.c_str());
             cgram_flag++;
+            replaced = true;
             break; // Stop after the first custom replacement
           }
         }
@@ -826,7 +855,7 @@ std::string VFDComponent::process_string(const char *str)
     {
       if (codepoint < 256)
       {
-        result += static_cast<char>(codepoint);
+        result.push_back(static_cast<uint16_t>(codepoint));
       }
     }
 
@@ -835,5 +864,5 @@ std::string VFDComponent::process_string(const char *str)
   return result; // Return the processed string
 }
 
-}  // namespace vfd8md06inkm
+}  // namespace vfd
 }  // namespace esphome
