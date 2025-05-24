@@ -50,9 +50,9 @@ substitutions:
   intensity: "200" # Initial brightness 0 to 255 (default: 200)
   remove_spaces: "true" # remove leading or trailing spaces (default: false)
   scroll_delay: "500, 500" # optional initial & subsequent delays when scrolling (in milliseconds) (default: 1500, 500) (first text = both numbers combined)
-  # Replace characters: Unicode character:Fubata byte (characters that already exist on the device, can use decimal, hex, or binary in MSB-LSB order)
+  # Replace characters: Unicode character:Fubata byte (character that already exists on the device: ASCII, decimal, hex, or binary in MSB-LSB order)
   replace: ""
-  # Custom characters: Unicode character:column1,column2,column3,column4,column5 (binary painting from bottom to top)
+  # Custom characters: Unicode character:column1,column2,column3,column4,column5 (binary painting from bottom to top: can be in decimal or hex too)
   custom: "°:0,6,9,9,6;₿:62,107,42,107,20;금:117,85,85,85,119;목:55,53,61,53,119;수:20,18,113,18,20;오:34,37,61,37,34;요:34,61,37,61,34;월:38,45,102,72,95;일:18,21,114,64,71;전:121,71,89,68,95;토:95,85,117,85,81;화:22,123,22,127,8;후:38,42,107,42,38"
 
 esphome:
