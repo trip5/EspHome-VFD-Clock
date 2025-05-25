@@ -418,7 +418,7 @@ it.strftime(const char *format, ESPTime time) __attribute__((format(strftime, 2,
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
-| 2025.05.24 | Added YAMLs for LGL Studio V16, language_filters hugely improved |
+| 2025.05.25 | Added YAMLs for LGL Studio V16, language_filters hugely improved |
 | 2024.12.09 | Recoded to remove many global variables, relying on numbers and switches where possible, hard-coded variables removed |
 | 2024.11.11 | Display Off routine fix, power measurements complete |
 | 2024.10.29 | 2 variables in regular version now hard-coded, should free up more memory for custom characters |
