@@ -1,5 +1,8 @@
 substitutions:
 
+  # Replace characters: Unicode character:Fubata byte (character that already exists on the device: ASCII, decimal, hex, or binary in MSB-LSB order)
+  replace: "" # still required, even if blank!!
+
   # Custom characters: Unicode character:column1,column2,column3,column4,column5 (binary painting from bottom to top)
   # 上下午月日星期天一二三四五六七八九十 - sorry if 期 looks bad
   custom: "上:64,64,127,68,68;下:1,1,127,5,9;午:20,19,126,18,16;月:64,63,21,85,127;日:127,73,73,73,127;星:79,85,125,87,68;期:95,21,127,21,127;天:68,37,31,37,68;一:10,10,10,10,10;二:32,34,34,34,32;三:65,73,73,73,73;四:127,41,39,37,127;五:73,121,79,121,64;六:98,26,3,26,98;七:4,63,68,66,98;八:112,15,0,15,112;九:98,31,2,126,64;十:8,8,127,8,8;年:36,59,42,42,126;"

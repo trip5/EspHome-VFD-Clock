@@ -1,16 +1,20 @@
 substitutions:
 
-# for 8-MD-06INKM (VFD-Clock):
-  # Replace characters: Unicode character:Fubata byte (characters that already exist on the device, can use decimal, hex, or binary in MSB-LSB order)
-  # Some characters are available (or their Latin similars): ΙαΦβΜρΑπούλγΣΟΝΔΚΤΠμ
-  replace: "Ι:I;α:176;Φ:228;β:177;Μ:M;ρ:186;Α:A;π:226;ο:o;ύ:163;λ:183;γ:y;Σ:191;Ο:O;Ν:N;Δ:179;Κ:K;Τ:T;Π:185;μ:184;"
-# Note that other displays are untested and maybe unknown
-  # And some are not: άενικτέυί
-  # Custom characters: Unicode character:column1,column2,column3,column4,column5 (binary painting from bottom to top)
-  custom: "ά:120,68,36,25,103;ε:28,42,42,34,20;ν:6,24,32,30,2;ι:0,0,60,32,16;κ:0,60,8,52,0;τ:4,4,60,36,20;έ:28,42,42,35,21;υ:28,32,32,32,60;ί:0,0,60,33,17;"
+  # Replace characters: Unicode character:Fubata byte (character that already exists on the device: ASCII, decimal, hex, or binary in MSB-LSB order)
 
-# Special notes:
-# Greek has not been eyeballed by an actual Greek person - if you can help, thank you!
+  # for 8-MD-06INKM (VFD-Clock) - some characters are available (or their Latin similars): ΙΜΑογΟΝΚΤαΦβρύλΣΔΠμ
+  replace: "Ι:I;Μ:M;Α:A;ο:o;γ:Y;Ο:O;Ν:N;Κ:K;Τ:T;ν:Y;α:176;Φ:228;β:177;ρ:186;ύ:163;λ:183;Σ:191;Δ:179;Π:185;μ:184"
+
+  # Some characters are not: άενιίκτέυυσμώήηςπ
+  # Custom characters: Unicode character:column1,column2,column3,column4,column5 (binary painting from bottom to top)
+  custom: "ά:120,68,38,31,100;ε:28,42,42,34,20;ι:0,0,60,32,16;ί:0,0,58,33,16;κ:0,60,8,52,0;τ:4,4,60,36,20;έ:28,42,42,35,21;υ:28,32,32,32,60;υ:30,32,32,32,30;σ:28,34,34,34,30;μ:62,32,32,32,30;ώ:30,32,26,33,30;ή:56,4,6,5,120;η:62,4,2,2,124;ς:12,18,18,18,98;π:4,124,4,124,4;"
+
+  # Note that other displays are untested and maybe unknown so...?
+  replace: ""
+  custom: ""
+
+# Special note:
+# Greek has not been eyeballed by an actual Greek person - if you can help, thank you!  I'm sure many look terrible - sorry!
 
 text_sensor:
 
