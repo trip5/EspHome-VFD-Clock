@@ -15,6 +15,8 @@ Skip down to the [Custom Component Driver](#custom-component-driver) section bel
 
 Due to memory constraints on the ESP8266 these clocks use, I've decided to split the functions by how you may choose to use the clock.  Read below for more details.
 
+---
+
 ## New to ESPHome?
 
 Try following this step-by-step to get Docker onto your computer: [Beginner’s Guide to Installing ESPHome on Docker Desktop](https://deploy-preview-4411--esphome.netlify.app/guides/beginners_guide_docker_desktop)
@@ -23,9 +25,11 @@ And this to compile the YAML: [Beginner's Guide to Adding Devices](https://deplo
 
 These guides are proposed for the ESPHome documentation and if you find them helpful, it would be great if you could leave a comment in the [Pull Request](https://github.com/esphome/esphome-docs/pull/4411) to get them added to the ESPHome Docs officially.
 
-## New to Flashing a Device?
+### New to Flashing a Device?
 
 Please read this: [Physically Connecting to your Device](https://esphome.io/guides/physical_device_connection).
+
+---
 
 ## VFD clocks
 
@@ -59,6 +63,8 @@ Don't forget to connect GPIO0 to GND when first connecting to your serial flashe
 GPIO0 is not exposed here but it is connected to the ▲ button so hold this button while powering-on.  Dupont male ends fit nicely (as do pin headers).
 
 ![image](./images/LGLStudioV16-Pins.jpg)
+
+---
 
 ## Using This firmware
 
@@ -155,6 +161,8 @@ Read more in the [Custom Component Driver](#custom-component-driver) section.
 
 Time can be synced to the Internet at configurable intervals between 1 - 24 hours, provided the wifi network is connected.
 
+---
+
 ## Non-HA Version
 
 The files [`EHVClock.yaml`](EHVClock.yaml) and [`EHVClock_LGLV16.yaml`](EHVClock_LGLV16.yaml) contains functions useful for using the clock as...
@@ -244,6 +252,8 @@ You could consider hosting the file on another machine in-house, too by using so
 Please note that for some reason, I'm not sure that the UI can be viewed from an Chrome-based mobile browser. Maybe my phone has an issue.
 It seems to work fine when viewing on a computer or an Apple phone. If you have information to share, I'd be glad to know why this is.
 
+---
+
 ## Home Assistant Version
 
 The file [`EHVClock-HA.yaml`](EHVClock-HA.yaml) and [`EHVClock_LGLV16-HA.yaml`](EHVClock_LGLV16-HA.yaml)
@@ -289,6 +299,10 @@ Anything in `configuration.yaml` under the `template:` heading must now be moved
 The file [`template.yaml`](template.yaml) contains several examples how to add sensors that can be automatically shown by the clock.
 I personally use only one sensor in my Home Assistant and 2 clocks in the house get data from the same sensor but you can (of course) create a sensor for each  individual clock.
 
+---
+
+## Notes
+
 ### Notice Regarding Flash Size of 8-Character Clock
 
 It has come to my attention that certain clocks have what could be a fake ESP-12H stamp on the back.  My clocks all have an ESP-12F (an "upgraded" version of the ESP-12E) with 4M of flash memory. An ESP-12H should have 2M of flash but these only have 1M of flash memory! They look like this:
@@ -321,6 +335,8 @@ Most of the `_16` language filters were made before mapping out the character re
 I'm pretty sure most will not work correctly.
 
 There is a speaker on GPIO12.  Alarms may be implemented in a future update.
+
+---
 
 ## Custom Component Driver
 
@@ -394,6 +410,8 @@ it.strftime(position, ESPTime time) __attribute__((format(strftime, 3, 0)));
 it.strftime(const char *format, ESPTime time) __attribute__((format(strftime, 2, 0)));
 ```
 
+---
+
 ## Update History
 
 ### Clock Updates
@@ -414,6 +432,7 @@ it.strftime(const char *format, ESPTime time) __attribute__((format(strftime, 2,
 | 2024.12.09 | Scroll text initial delay fix (initial delay was starting without displaying) |
 | 2024.10.26 | Support for Futaba 8-MD-06INKM display |
 
+---
 
 ## Useful Links
 
