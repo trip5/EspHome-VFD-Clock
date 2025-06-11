@@ -371,7 +371,7 @@ Please note that non-Unicode characters are dropped by default. If you experienc
 external_components:
   - source:
       type: git
-      url: https://github.com/trip5/vfdclock
+      url: https://github.com/trip5/EspHome-VFD-Clock
       ref: main
     refresh: 60s
     components: [ vfd ]
