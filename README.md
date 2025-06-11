@@ -11,7 +11,7 @@ Using a VFD in ESPHome requires the display to be supported by an external compo
 The one included in this repository is originally meant for the 8-MD-06INKM as used in the VFD Clock.
 It definitely supports other VFD displays that use the Hitachi HD44780U interface, including the unknown Samsung VFD as used in the LGL Studio V16.
 
-Skip down to the [Custom Component Driver](#custom-component-driver) section below if you're just here for the drivers.
+Skip down to the [Custom Component Driver](#custom-component-driver) section below if you're just here for the VFD drivers.
 
 Due to memory constraints on the ESP8266 these clocks use, I've decided to split the functions by how you may choose to use the clock.  Read below for more details.
 
@@ -330,9 +330,6 @@ esptool.py -p PORT erase_flash
 ```
 
 ### Notice Regarding the LGL Studio V16
-
-Most of the `_16` language filters were made before mapping out the character replacements available.  I may come back to these and fix them later.
-I'm pretty sure most will not work correctly.
 
 There is a speaker on GPIO12.  Alarms may be implemented in a future update.
 
