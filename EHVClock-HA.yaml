@@ -1,21 +1,19 @@
 # My github: https://github.com/trip5
 substitutions:
-  name: vfd-clock-ha
-  friendly_name: VFD-Clock-HA
+  name: "vfd-clock-ha"
+  friendly_name: "VFD-Clock-HA"
   comment: "EHVClock-HA from Trip5"
-  project_version: "2024.05.24"
-  project_name: Trip5.EspHomeVfdClock-HA
+  project_name: "Trip5.EspHomeVfdClock-HA"
+  project_version: "2026.01.22"
   waiting: "EHVClock-HA" # shows when waiting for time
 
   # Time zone must be POSIX format: (ie "KST-9" & "PST8PDT,M3.2.0/2:00:00,M11.1.0/2:00:00" & "AST4ADT,M3.2.0,M11.1.0")
-  # Most can be viewed here: https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv
-  # or here: https://support.cyberdata.net/portal/en/kb/articles/010d63c0cfce3676151e1f2d5442e311
+  # A full list can be viewed here: https://github.com/trip5/timezones.json/blob/master/timezones.md
   # If you need to make a custom POSIX format you can look here: https://developer.ibm.com/articles/au-aix-posix/)
   # or even better, use this POSIX Generator (courtesy of TopYuan): https://www.topyuan.top/posix
   time_zone: "AST4ADT,M3.2.0,M11.1.0"
   # Alternate Time Zone here.  Must also be POSIX format - it would be good to keep the time zone matched to any language substitution being used (ie. Korean to match Korea Standard Time)
   time_zone_alt: "KST-9"
-  time_zone_alt_name: "KST"
 
   # time and date formats: https://esphome.io/components/time/?highlight=strftime#strftime and https://strftime.org/
   # time_format: "%H:%M" (13:25) / "%H:%M:%S" (13:25:59) / "%I:%M%p" (01:25PM) / "%l:%M%p" (1:25PM)
@@ -29,7 +27,12 @@ substitutions:
   # Please be sure to add those needed characters to the Replace or Custom characters as well, or those special characters will not be displayed!
 
   # This is the sensor name from your Home Assistant configuration
-  ha_sensor_data: sensor.vfd_clock_data
+  ha_sensor_data: "sensor.vfd_clock_data"
+
+  # Making Home Assistant Helpers (Input Text) with these names can override the above time zones
+  # Add "Clock Time Zone" and "Clock Time Zone Alt" as a text helper through https://my.home-assistant.io/redirect/helpers/
+  ha_time_zone: "input_text.clock_time_zone"
+  ha_time_zone_alt: "input_text.clock_time_zone_alt"
 
   # Pins for Display
   clk_pin: GPIO12
@@ -56,12 +59,12 @@ substitutions:
   custom: "°:0,6,9,9,6;₿:62,107,42,107,20;금:117,85,85,85,119;목:55,53,61,53,119;수:20,18,113,18,20;오:34,37,61,37,34;요:34,61,37,61,34;월:38,45,102,72,95;일:18,21,114,64,71;전:121,71,89,68,95;토:95,85,117,85,81;화:22,123,22,127,8;후:38,42,107,42,38"
 
 esphome:
-  name: ${name}
+  name: "${name}"
+  friendly_name: "${friendly_name}"
   comment: "${comment}"
   project:
     name: "${project_name}"
     version: "${project_version}"
-  min_version: 2023.11.0
   on_boot:
     - priority: 600
       then:
@@ -71,23 +74,17 @@ esphome:
             then:
               - switch.turn_on: tz_alt
         - rx8025.read_time:
-    - priority: -100
-      then:
-        - wait_until:
-            condition:
-              - lambda: 'return (id(my_time).now().is_valid());'
-        - rx8025.write_time:
 
 esp8266:
   board: esp12e
-  restore_from_flash: True
+  restore_from_flash: true
 
 wifi:
   networks:
     - ssid: !secret wifi_ssid
       password: !secret wifi_password
   reboot_timeout: 15min # Default is 15min
-  enable_on_boot: True
+  enable_on_boot: true
   id: wifi_id
   ap:
     ssid: ${name}
@@ -97,7 +94,7 @@ wifi:
     - light.turn_off: led1
 
 external_components:
-# Use Trip5's VFDClock VFD8MD06INK ESPHome Component (for the Display)
+# Use Trip5's VFD ESPHome Component (for the Display)
   - source:
       type: git
       url: https://github.com/trip5/EspHome-VFD-Clock
@@ -120,23 +117,58 @@ external_components:
     components: [ rx8025 ]
 
 time:
-  - platform: homeassistant # use Home Assistant as a time source (sntp is also possible)
+  - platform: sntp # use SNTP as a time source / do not use Home Assistant!
     id: my_time
     timezone: "${time_zone}"
     update_interval: 24h # This seems like the longest safe amount of time - actual configured update happens in interval section (or when changing time zone)
   - platform: rx8025
-    id: my_time_rx
+    id: rtc_time
     update_interval: never
     timezone: "${time_zone}"
     address: ${rtc_address}
-    battery1.5v: True
+    battery1.5v: true
 
 script:
   - id: sync_the_time
     mode: restart
     then:
+      - wait_until:
+          condition: wifi.connected
+      - lambda: |-
+          ESP_LOGI("info", "Sync the Time");
       - lambda: 'id(my_time)->update();'
       - rx8025.write_time:
+  - id: set_timezone
+    mode: restart
+    then:
+      - delay: 250ms # need states to stick before updating (helps prevent crashes, too)
+      - if:
+          condition:
+            switch.is_off: tz_alt_auto
+          then:
+            - lambda: |-
+                if (id(use_ha_time_zones).state && !id(ha_time_zone).state.empty()) {
+                  ESP_LOGI("info", "Set Time Zone (From HA)");
+                  id(my_time)->set_timezone(id(ha_time_zone).state.c_str());
+                  id(rtc_time)->set_timezone(id(ha_time_zone).state.c_str());
+                } else {
+                  ESP_LOGI("info", "Set Time Zone (Internal)");
+                  id(my_time)->set_timezone("${time_zone}");
+                  id(rtc_time)->set_timezone("${time_zone}");
+                }
+                //id(my_time)->call_setup(); // might be needed?
+          else:
+            - lambda: |-
+                if (id(use_ha_time_zones).state && !id(ha_time_zone_alt).state.empty()) {
+                  ESP_LOGI("info", "Set Time Zone Alt (From HA)");
+                  id(my_time)->set_timezone(id(ha_time_zone_alt).state.c_str());
+                  id(rtc_time)->set_timezone(id(ha_time_zone_alt).state.c_str());
+                } else {
+                  ESP_LOGI("info", "Set Time Zone Alt (Internal)");
+                  id(my_time)->set_timezone("${time_zone_alt}");
+                  id(rtc_time)->set_timezone("${time_zone_alt}");
+                }
+                //id(my_time)->call_setup(); // might be needed?
 
 # Enable Home Assistant API
 api:
@@ -145,6 +177,7 @@ api:
     key: !secret encryption_key
   reboot_timeout: 15min # 15min is default
   # This next section creates the Home Assistant services to allow messages to be displayed (also used for certain system messages)
+  custom_services: true
   services:
     - service: message
       variables:
@@ -179,13 +212,13 @@ api:
             args: [ 'message_alive_time', 'message_display_time' , 'message_clock_time' ]
 
 mdns:
-  disabled: False # needs to be on to connect to HA
+  disabled: false # needs to be on to connect to HA
 
 logger:
   level: NONE
-# Logging is disabled to save memory but you can easily enable logging (and stop the various sensors/switches from spamming the log) by deleting the above line and uncommening the lines below
+# Logging is disabled to save memory but you can easily enable logging (and stop the various sensors/switches from spamming the log) by deleting the above line and uncommenting the lines below
 # Note that increasing the level uses up memory (which this device has very little available) and may cause errors and/or crashing - please note it's also disabled in the web_server section
-#  level: DEBUG
+#  level: INFO
 #  logs:
 #    sensor: ERROR
 #    text_sensor: NONE
@@ -193,71 +226,57 @@ logger:
 #    light: NONE
 #    number: NONE
 
-# Web Server is disabled due to memory constraints.  Enable at your own risk (consider removing captive_portal, reducing fonts to 1 to save memory)
+# Web Server is disabled due to memory constraints.  Enable at your own risk (consider removing captive_portal)
 #web_server:
 #  port: 80
-#  ota: True
-#  include_internal: False # True will expose more than needed to the Web UI
-#  version: 2 # version 3 is much larger but possible if local is False
-#  local: True # will download www.js and serve it directly from the clock
-#  log: False # disabling in the WebUI to save memory
+#  # ota: false # true by default
+#  include_internal: false # true will expose more than needed to the Web UI
+#  version: 2 # version 3 is much larger but possible if local is false
+#  local: true # will download www.js and serve it directly from the clock
+#  log: false # disabling in the WebUI to save memory
 
 ota:
-  - platform: esphome
-    password: !secret ota_password
-    on_begin:
-      then:
-        - lambda: 'id(vf_display).print("OTA...");'
-        - logger.log: "OTA Update started."
-    on_progress:
-      then:
-        - lambda: 'if (x > 9) { id(vf_display).printf("OTA %d%%", (int)x); }'
-        - logger.log:
-            format: "OTA progress %0.1f%%"
-            args: ["x"]
-    on_end:
-      then:
-        - lambda: 'id(vf_display).print("OTA Done");'
-        - logger.log: "OTA end"
-    on_error:
-      then:
-        - lambda: 'id(vf_display).print("OTAError");'
-        - logger.log:
-            format: "OTA update error %d"
-            args: ["x"]
+  platform: esphome
+  password: !secret ota_password
+  on_begin:
+    then:
+      - lambda: 'id(vf_display).print("OTA...");'
+      - logger.log: "OTA Update started."
+  on_progress:
+    then:
+      - lambda: 'if (x > 9) { id(vf_display).printf("OTA %d%%", (int)x); }'
+      - logger.log:
+          format: "OTA progress %0.1f%%"
+          args: ["x"]
+  on_end:
+    then:
+      - lambda: 'id(vf_display).print("OTA Done");'
+      - logger.log: "OTA end"
+  on_error:
+    then:
+      - lambda: 'id(vf_display).print("OTAError");'
+      - logger.log:
+          format: "OTA update error %d"
+          args: ["x"]
 
 captive_portal:
 
 text_sensor:
-  - platform: version
-    name: "${friendly_name} ESPHome Version"
-    hide_timestamp: True
-    entity_category: diagnostic
-  - platform: wifi_info
-    ip_address:
-      id: wifi_ip
-      name: "${friendly_name} IP Address"
-      entity_category: diagnostic
-    ssid:
-      id: wifi_ssid
-      name: "${friendly_name} SSID"
-      entity_category: diagnostic
   - platform: template
-    name: "${friendly_name} ${project_name} Version"
-    lambda: 'return to_string("${project_version}");'
+    id: project_version
+    name: "${project_name} Version"
+    lambda: 'return {"${project_version}"};'
     entity_category: diagnostic
-  - platform: template
-    name: "${friendly_name} Time Zone"
-    lambda: 'return {"${time_zone}"};'
-    entity_category: diagnostic
+    icon: mdi:github
+    disabled_by_default: true
   # Below this point are text sensors to hold time and date and allow for substitutions... you can delete/edit the filters, just don't delete the entire text sensor
   # The github repo should also contain methods to change the time into other localized formats.
   - platform: template
     id: time_text
-    name: "${friendly_name} Replacement Time Text"
+    name: "Replacement Time Text"
     entity_category: diagnostic
     update_interval: never
-    internal: True
+    internal: true
     filters:
       - lambda: |-
           // Use the format "%p%I:%M" (PM 1:25) and run filters on it to get 오후1:25
@@ -280,10 +299,10 @@ text_sensor:
         - "PM -> 오후"
   - platform: template
     id: date_text
-    name: "${friendly_name} Replacement Date Text"
+    name: "Replacement Date Text"
     entity_category: diagnostic
     update_interval: never
-    internal: True
+    internal: true
     filters:
       - lambda: |-
           // Use the format "%b %d" (May 23) and run filters on it to get 05월 23일
@@ -311,10 +330,10 @@ text_sensor:
         - "Dec -> 12월"
   - platform: template
     id: dateA_text
-    name: "${friendly_name} Replacement Date A Text"
+    name: "Replacement Date A Text"
     entity_category: diagnostic
     update_interval: never
-    internal: True
+    internal: true
     filters:
       - lambda: |-
           // Use the format "%a" (Fri) and run filters on it to get 금요일
@@ -376,20 +395,59 @@ text_sensor:
     entity_id: '${ha_sensor_data}'
     attribute: 9
     id: ha_sensor_data_9
+  # Pull time zone helpers from Home Assistant, filter, then run the set timezone script
+  - platform: homeassistant
+    entity_id: "${ha_time_zone}"
+    id: ha_time_zone
+    name: "${ha_time_zone}"
+    internal: true
+    filters:
+      - substitute:
+          - "unknown -> "
+          - "unavailable -> "
+    on_value:
+      then:
+        - lambda: |-
+            ESP_LOGI("info", "HA Time Zone Override Set");
+        - script.execute: set_timezone
+  - platform: homeassistant
+    entity_id: "${ha_time_zone_alt}"
+    id: ha_time_zone_alt
+    name: "${ha_time_zone_alt}"
+    internal: true
+    filters:
+      - substitute:
+          - "unknown -> "
+          - "unavailable -> "
+    on_value:
+      then:
+        - lambda: |-
+            ESP_LOGI("info", "HA Alternate Time Zone Override Set");
+        - script.execute: set_timezone
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal Strength"
+    id: wifisignal
+    update_interval: 30s
+    unit_of_measurement: "dBm"
+    entity_category: "diagnostic"
+    icon: mdi:wifi
+    disabled_by_default: true
 
 output:
   - platform: esp8266_pwm
     id: statusled
     pin:
       number: ${status_led_pin}
-      inverted: True
+      inverted: true
 
 light:
   - platform: monochromatic
     id: led1
-    name: "${friendly_name} Status LED"
+    name: "Status LED"
     output: statusled
-    internal: True
+    internal: true
 
 preferences:
   flash_write_interval: 15s # 0 does immediate write to memory with no mem buffer (not recommended) (only saves when persistent variables have changed)
@@ -397,7 +455,7 @@ preferences:
 i2c:
   sda: ${sda_pin}
   scl: ${scl_pin}
-  scan: True
+  scan: true
   id: i2cbus
   frequency: ${i2c_frequency}
 
@@ -408,12 +466,12 @@ spi:
 # Some info how to handle multi_click options: https://community.home-assistant.io/t/esphome-button-held-double-press/136083/10
 binary_sensor:
   - platform: status
-    name: "${friendly_name} Status"
+    name: "Status"
   - platform: gpio
     pin: 
       number: ${button_pin}
-      inverted: True
-    name: "${friendly_name} Button"
+      inverted: true
+    name: "Button"
     filters:
       - delayed_on: 10ms
       - delayed_off: 10ms
@@ -467,7 +525,7 @@ display:
       // Display the message if all conditions are met
       if (id(my_time).now().is_valid()) {
         if ((id(message_alive_time) != 0) && (id(message_clock_time_count) >= id(message_clock_time))) {
-          ESP_LOGD("main", "Showing Message");
+          ESP_LOGI("info", "Showing Message");
           id(message_display_time_count) += 1;
           id(message_alive_time_count) += 1;
           std::string message_text = id(message);
@@ -478,7 +536,7 @@ display:
             if (id(message_alive_time_count) >= id(message_alive_time)) {
               id(message_alive_time_count) = 0;
               id(message_alive_time) = 0;
-              ESP_LOGD("main", "Message Alive Time finished.");
+              ESP_LOGI("info", "Message Alive Time finished.");
             }
           }
         } else {
@@ -673,197 +731,201 @@ interval:
 globals:
   - id: replace_interval_count
     type: uint8_t
-    restore_value: False
+    restore_value: false
     initial_value: '0'
   - id: message
     type: std::string
-    restore_value: False
+    restore_value: false
     initial_value: ''
   - id: message_display_time
     type: uint8_t
-    restore_value: False
+    restore_value: false
     initial_value: '0'
   - id: message_clock_time
     type: uint8_t
-    restore_value: False
+    restore_value: false
     initial_value: '0'
   - id: message_alive_time
     type: uint8_t
-    restore_value: False
+    restore_value: false
     initial_value: '0'
   - id: message_display_time_count
     type: uint8_t
-    restore_value: False
+    restore_value: false
     initial_value: '0'
   - id: message_clock_time_count
     type: uint8_t
-    restore_value: False
+    restore_value: false
     initial_value: '0'
   - id: message_alive_time_count
     type: uint8_t
-    restore_value: False
+    restore_value: false
     initial_value: '0'
   - id: time_display_count
     type: uint8_t
-    restore_value: False
+    restore_value: false
     initial_value: '0'
   - id: date_display_count
     type: uint8_t
-    restore_value: False
+    restore_value: false
     initial_value: '0'
   - id: sync_time_count
     type: uint8_t
-    restore_value: False
+    restore_value: false
     initial_value: '0'
 # HA Sensor variables
   - id: ha_sensor_data_this
     type: uint8_t
-    restore_value: False
+    restore_value: false
     initial_value: '0'
   - id: ha_sensor_data_this_time
     type: uint8_t
-    restore_value: False
+    restore_value: false
     initial_value: '0'
   - id: ha_sensor_data_now
     type: bool
-    restore_value: False
+    restore_value: false
     initial_value: 'false'
-
-button:
-  - platform: restart
-    id: restart_button
-    name: "${friendly_name} Restart"
-    entity_category: diagnostic
 
 switch:
   - platform: template
-    name: "${friendly_name} 12 Hour Mode"
+    name: "12 Hour Mode"
     id: hour12_mode
     restore_mode: RESTORE_DEFAULT_OFF
-    optimistic: True
+    optimistic: true
     turn_on_action:
         - lambda: |-
-            ESP_LOGD("main", "12 Hour Mode On");
+            ESP_LOGI("info", "12 Hour Mode On");
     turn_off_action:
         - lambda: |-
-            ESP_LOGD("main", "12 Hour Mode Off");
+            ESP_LOGI("info", "12 Hour Mode Off");
+    entity_category: config
+    icon: mdi:clock-digital
   - platform: template
-    name: "${friendly_name} Date A Mode"
+    name: "Date A Mode"
     id: date_A_mode
     restore_mode: RESTORE_DEFAULT_OFF
-    optimistic: True
+    optimistic: true
     turn_on_action:
         - lambda: |-
-            ESP_LOGD("main", "Date A Mode On");
+            ESP_LOGI("info", "Date A Mode On");
     turn_off_action:
         - lambda: |-
-            ESP_LOGD("main", "Date A Mode Off");
+            ESP_LOGI("info", "Date A Mode Off");
+    entity_category: config
+    icon: mdi:calendar-blank-multiple
   - platform: template
-    name: "${friendly_name} Replacement Mode"
+    name: "Replacement Mode"
     id: replace_mode
     restore_mode: RESTORE_DEFAULT_OFF
-    optimistic: True
+    optimistic: true
     turn_on_action:
         - lambda: |-
-            ESP_LOGD("main", "Replace Mode On");
+            ESP_LOGI("info", "Replace Mode On");
             id(auto_replace_tz_alt).turn_off();
             id(replace_mode_auto).turn_on();
     turn_off_action:
         - lambda: |-
-            ESP_LOGD("main", "Replace Mode Off");
+            ESP_LOGI("info", "Replace Mode Off");
             id(replace_mode_auto).turn_off();
+    entity_category: config
+    icon: mdi:file-replace
   - platform: template
     id: replace_mode_auto
     restore_mode: RESTORE_DEFAULT_OFF
-    optimistic: True
-    internal: True
+    optimistic: true
+    internal: true
     turn_on_action:
         - lambda: |-
-            ESP_LOGD("main", "Replace Mode Auto On");
+            ESP_LOGI("info", "Replace Mode Auto On");
     turn_off_action:
         - lambda: |-
-            ESP_LOGD("main", "Replace Mode Auto Off");
+            ESP_LOGI("info", "Replace Mode Auto Off");
   - platform: template
-    name: "${friendly_name} Date Display Mode"
+    name: "Date Display Mode"
     id: date_display_mode
     restore_mode: RESTORE_DEFAULT_OFF
-    optimistic: True
+    optimistic: true
     turn_on_action:
         - lambda: |-
-            ESP_LOGD("main", "Date on");
+            ESP_LOGI("info", "Date on");
             id(message) = ("Date on");
             id(message_alive_time) = 1;
             id(message_display_time) = 1;
             id(message_clock_time) = 0;
     turn_off_action:
         - lambda: |-
-            ESP_LOGD("main", "Date off");
+            ESP_LOGI("info", "Date off");
             id(message) = ("Date off");
             id(message_alive_time) = 1;
             id(message_display_time) = 1;
             id(message_clock_time) = 0;
+    entity_category: config
+    icon: mdi:calendar
   - platform: template
-    name: "${friendly_name} HA Sensors Data All"
+    name: "HA Sensors Data All"
     id: ha_sensor_data_all
     restore_mode: RESTORE_DEFAULT_OFF
-    optimistic: True
+    optimistic: true
     turn_on_action:
         - lambda: |-
-            ESP_LOGD("main", "HA Sensors Data All On");
+            ESP_LOGI("info", "HA Sensors Data All On");
     turn_off_action:
         - lambda: |-
-            ESP_LOGD("main", "HA Sensors Data All Off");
+            ESP_LOGI("info", "HA Sensors Data All Off");
+    entity_category: config
+    icon: mdi:rss
   - platform: template
-    name: "${friendly_name} HA Sensors Data Stop"
+    name: "HA Sensors Data Stop"
     id: ha_sensor_data_stop
     restore_mode: RESTORE_DEFAULT_OFF
-    optimistic: True
+    optimistic: true
     turn_on_action:
         - lambda: |-
-            ESP_LOGD("main", "HA Sensors Data Stop On");
+            ESP_LOGI("info", "HA Sensors Data Stop On");
     turn_off_action:
         - lambda: |-
-            ESP_LOGD("main", "HA Sensors Data Stop Off");
+            ESP_LOGI("info", "HA Sensors Data Stop Off");
+    entity_category: config
+    icon: mdi:rss-off
 # Alt Time Zone selector / activator
   - platform: template
-    name: "${friendly_name} Alternate Time (${time_zone_alt_name})"
+    name: "Alternate Time"
     id: tz_alt
     restore_mode: RESTORE_DEFAULT_OFF
-    optimistic: True
+    optimistic: true
     turn_on_action:
         - lambda: |-
-            ESP_LOGD("main", "Alt Time Zone On");
+            ESP_LOGI("info", "Alt Time Zone On");
             id(auto_replace_tz_alt).turn_off();
             id(tz_alt_auto).turn_on();
     turn_off_action:
         - lambda: |-
-            ESP_LOGD("main", "Alt Time Zone Off");
+            ESP_LOGI("info", "Alt Time Zone Off");
             id(tz_alt_auto).turn_off();
+    entity_category: config
+    icon: mdi:airplane-clock
   - platform: template
     id: tz_alt_auto
     restore_mode: DISABLED
-    optimistic: True
-    internal: True
+    optimistic: true
+    internal: true
     turn_on_action:
         - lambda: |-
-            ESP_LOGD("main", "Alt Time Zone Auto On");
-            id(my_time)->set_timezone("${time_zone_alt}");
-            id(my_time_rx)->set_timezone("${time_zone_alt}");
-            id(my_time)->call_setup();
+            ESP_LOGI("info", "Alt Time Zone Auto On");
+        - script.execute: set_timezone
     turn_off_action:
         - lambda: |-
-            ESP_LOGD("main", "Alt Time Zone Auto Off");
-            id(my_time)->set_timezone("${time_zone}");
-            id(my_time_rx)->set_timezone("${time_zone}");
-            id(my_time)->call_setup();
+            ESP_LOGI("info", "Alt Time Zone Auto Off");
+        - script.execute: set_timezone
   - platform: template
-    name: "${friendly_name} Auto Replacement = Alt. Time"
+    name: "Auto Replacement = Alt. Time"
     id: auto_replace_tz_alt
     restore_mode: RESTORE_DEFAULT_OFF
-    optimistic: True
+    optimistic: true
     turn_on_action:
         - lambda: |-
-            ESP_LOGD("main", "Auto Replacement = Alt. Time On");
+            ESP_LOGI("info", "Auto Replacement = Alt. Time On");
             if (id(replace_interval).state == 0) {
               auto call = id(replace_interval).make_call();
               call.set_value(1);
@@ -873,15 +935,32 @@ switch:
             id(tz_alt).turn_off();
     turn_off_action:
         - lambda: |-
-            ESP_LOGD("main", "Auto Replacement Mode = Alt. Time Off");
+            ESP_LOGI("info", "Auto Replacement Mode = Alt. Time Off");
             id(tz_alt_auto).turn_off();
+    entity_category: config
+    icon: mdi:yin-yang
+  - platform: template
+    name: "Use HA Overrides"
+    id: use_ha_time_zones
+    restore_mode: RESTORE_DEFAULT_OFF
+    optimistic: true
+    turn_on_action:
+        - lambda: |-
+            ESP_LOGI("info", "Use HA Overrides On");
+        - script.execute: set_timezone
+    turn_off_action:
+        - lambda: |-
+            ESP_LOGI("info", "Use HA Overrides Off");
+        - script.execute: set_timezone
+    entity_category: config
+    icon: mdi:home-assistant
 
 number:
   - platform: template
-    name: "${friendly_name} Brightness"
+    name: "Brightness"
     id: brightness
-    restore_value: True
-    optimistic: True
+    restore_value: true
+    optimistic: true
     step: 5
     min_value: 0
     max_value: 255
@@ -890,12 +969,14 @@ number:
     set_action:
       then:
         - lambda: |-
-            ESP_LOGD("main", "Brightness: %.0f", x);
+            ESP_LOGI("info", "Brightness: %.0f", x);
+    entity_category: config
+    icon: mdi:brightness-5
   - platform: template
-    name: "${friendly_name} Time Display Time"
+    name: "Time Display Time"
     id: time_display_time
-    restore_value: True
-    optimistic: True
+    restore_value: true
+    optimistic: true
     step: 1
     min_value: 1
     max_value: 60
@@ -905,12 +986,14 @@ number:
     set_action:
       then:
         - lambda: |-
-            ESP_LOGD("main", "Time Display Time: %.0f seconds", x);
+            ESP_LOGI("info", "Time Display Time: %.0f seconds", x);
+    entity_category: config
+    icon: mdi:clock-start
   - platform: template
-    name: "${friendly_name} Date Display Time"
+    name: "Date Display Time"
     id: date_display_time
-    restore_value: True
-    optimistic: True
+    restore_value: true
+    optimistic: true
     step: 1
     min_value: 1
     max_value: 60
@@ -920,12 +1003,14 @@ number:
     set_action:
       then:
         - lambda: |-
-            ESP_LOGD("main", "Date Display Time: %.0f seconds", x);
+            ESP_LOGI("info", "Date Display Time: %.0f seconds", x);
+    entity_category: config
+    icon: mdi:calendar-start
   - platform: template
-    name: "${friendly_name} Auto Replacement Interval"
+    name: "Auto Replacement Interval"
     id: replace_interval
-    restore_value: True
-    optimistic: True
+    restore_value: true
+    optimistic: true
     step: 1
     min_value: 0
     max_value: 10
@@ -935,17 +1020,21 @@ number:
     set_action:
       then:
         - lambda: |-
-            ESP_LOGD("main", "Auto Replacement Interval: %.0f", x);
+            ESP_LOGI("info", "Auto Replacement Interval: %.0f", x);
             if (x > 0) {
               if (id(replace_mode).state == true) {
                 id(replace_mode).turn_off();
               }
+            } else {
+              id(replace_mode_auto).turn_off();
             }
+    entity_category: config
+    icon: mdi:yin-yang
   - platform: template
-    name: "${friendly_name} Time Sync Interval"
+    name: "Time Sync Interval"
     id: sync_time
-    restore_value: True
-    optimistic: True
+    restore_value: true
+    optimistic: true
     step: 1
     min_value: 1
     max_value: 24
@@ -955,12 +1044,14 @@ number:
     set_action:
       then:
         - lambda: |-
-            ESP_LOGD("main", "Time Sync Interval: %.0f hours", x);
+            ESP_LOGI("info", "Time Sync Interval: %.0f hours", x);
+    entity_category: config
+    icon: mdi:timer-sync
   - platform: template
-    name: "${friendly_name} HA Sensor Data Time"
+    name: "HA Sensor Data Time"
     id: ha_sensor_data_time
-    restore_value: True
-    optimistic: True
+    restore_value: true
+    optimistic: true
     step: 1
     min_value: 1
     max_value: 10
@@ -970,4 +1061,6 @@ number:
     set_action:
       then:
         - lambda: |-
-            ESP_LOGD("main", "HA Sensor Data Time: %.0f seconds", x);
+            ESP_LOGI("info", "HA Sensor Data Time: %.0f seconds", x);
+    entity_category: config
+    icon: mdi:home-assistant
