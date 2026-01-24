@@ -125,92 +125,6 @@
             box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
         }
 
-        .wifi-section {
-            margin: 30px 0;
-            padding: 25px;
-            background: #e8f4fd;
-            border-radius: 8px;
-            border: 1px solid #b3d7f7;
-        }
-
-        .wifi-form {
-            display: grid;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .wifi-form input {
-            padding: 12px 16px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border-color 0.2s;
-        }
-
-        .wifi-form input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .wifi-form button {
-            padding: 12px 24px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .wifi-form button:hover {
-            background: #218838;
-        }
-
-        .wifi-form button:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-        }
-
-        .status-message {
-            margin: 15px 0;
-            padding: 12px 16px;
-            border-radius: 6px;
-            display: none;
-        }
-
-        .status-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .status-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .info-box {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 6px;
-            padding: 15px;
-            margin: 20px 0;
-        }
-
-        .info-box h3 {
-            margin-top: 0;
-            color: #856404;
-        }
-
-        .info-box p {
-            margin-bottom: 0;
-            color: #856404;
-        }
-
         @media (max-width: 600px) {
             .container {
                 padding: 20px;
@@ -267,7 +181,7 @@
             <h3>Flash Firmware</h3>
             <p>With this tool, you can:</p>
             <ul style="color: #495057; margin-left: 20px;">
-                <li>Install & update firmware</li>
+                <li>Flash firmware</li>
                 <li>Connect device to the Wi-Fi network</li>
                 <li>Visit the device's hosted web interface</li>
                 <li>Access logs and send terminal commands</li>
@@ -279,8 +193,8 @@
                 <a href="https://trip5.github.io/EspHome-VFD-Clock/#flashing" target="_blank" style="color: #667eea;">Learn how here</a>.</p>
 
             <h3>Improv Mode</h3>
-            <p>To send Wi-fi configuration, visit the device's WebUI, or add to Home Assistant, reset with GPIO0 not grounded.
-                Then click 'Connect' again.</p>
+            <p>Reset with GPIO0 not grounded and you can set up Wi-fi configuration, visit the device's WebUI, or add to Home Assistant.
+                Then, click 'Connect' again.</p>
             
             <div class="firmware-selector">
                 <label for="language-select">Select Firmware:</label>
@@ -294,16 +208,16 @@
                     <button slot="activate">Connect</button>
                 </esp-web-install-button>
             </div>
+
+            <h3>Time Zones</h3>
+            <p>These firmwares likely contain time zones that do not match yours.  That's OK, you can change them!
+                For non-HA versions, you can change the
+                <a href="https://trip5.github.io/EspHome-VFD-Clock/#time-zone-posix" target="_blank" style="color: #667eea;">POSIX string of the Alternate Time Zone</a>
+                in the device's Web UI. For HA versions, you can
+                <a href="https://trip5.github.io/EspHome-VFD-Clock/#override-time-zones" target="_blank" style="color: #667eea;">override the time zones</a>
+                with Helpers.</p>
         </div>
     </div>
-
-    <p style="text-align: center; color: #ccc; margin: 30px 0; font-size: 16px;">
-        These firmwares likely contain Time Zones that do not match yours.  That's OK, you can change them!
-        For non-HA versions, you can change the 
-        <a href="https://trip5.github.io/EspHome-VFD-Clock/#time-zone-posix" target="_blank" style="color: #667eea;">POSIX string of the Alternate Time Zone</a>
-        in the device's Web UI. For HA versions, you can
-        <a href="https://trip5.github.io/EspHome-VFD-Clock/#override-time-zones" target="_blank" style="color: #667eea;">override the time zones</a> with Helpers.
-    </p>
 
     <div class="footer" style="background: #1a1a1a; color: white; text-align: center; padding: 30px 40px; margin-top: 0; border-top: 1px solid #333;">
         <a href="https://github.com/trip5" target="_blank">
