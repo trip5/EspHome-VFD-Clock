@@ -440,7 +440,7 @@ it.strftime(const char *format, ESPTime time) __attribute__((format(strftime, 2,
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
-| 2026.01.24 | Re-introduced variant YAML files with `yaml-derive.py`, minor fixes, Github page added with mkdocs and web flashing tool |
+| 2026.01.24 | Re-introduced variant YAML files with `yaml-derive.py`, various fixes, Github page added with mkdocs and web flashing tool |
 | 2026.01.22 | Added POSIX to non-HA version and overrides to HA version, removed device's friendly name from entities, mdi icons & improv serial added, various fixes |
 | 2025.05.25 | Added YAMLs for LGL Studio V16, language_filters hugely improved |
 | 2024.12.09 | Recoded to remove many global variables, relying on numbers and switches where possible, hard-coded variables removed |

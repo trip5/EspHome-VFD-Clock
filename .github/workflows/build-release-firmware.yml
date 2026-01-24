@@ -147,6 +147,11 @@ jobs:
           for yaml_file in generated_yamls/*.yaml; do
             filename=$(basename "$yaml_file" .yaml)
             echo "🔨 Building ${filename}..."
+            
+            # Clean build directory to prevent mix-ups
+            rm -rf generated_yamls/.esphome/build/*
+            
+            # Compile the firmware
             esphome compile "$yaml_file"
             device_name=$(find generated_yamls/.esphome/build/ -maxdepth 1 -type d ! -name "build" -printf "%f\n" 2>/dev/null | head -1)
             if [ -z "$device_name" ]; then
@@ -201,7 +206,7 @@ jobs:
           echo "📝 Creating firmware manifests..."
           rm -rf docs/manifests
           mkdir -p docs/manifests
-          for bin_file in firmware/*.bin; do
+          for bin_file in $(ls -1 firmware/*.bin); do
             if [ -f "$bin_file" ]; then
               filename=$(basename "$bin_file")
               # Check for LGLV16 variants first
@@ -246,7 +251,7 @@ jobs:
           echo "  \"build_date\": \"${BUILD_DATE}\"," >> docs/firmware-info.json
           echo '  "variants": [' >> docs/firmware-info.json
           FIRST=true
-          for bin_file in firmware/*.bin; do
+          for bin_file in $(ls -1 firmware/*.bin); do
             if [ -f "$bin_file" ]; then
               filename=$(basename "$bin_file")
               # Check for LGLV16 variants first

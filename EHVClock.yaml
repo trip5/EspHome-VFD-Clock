@@ -115,11 +115,13 @@ wifi:
     ap_timeout: 10s # this has to be short, especially if using Stop Seek Wifi
   on_connect:
     - logger.log: "Wifi connected"
-    - light.turn_off: led1
+    - light.turn_off: led1    - lambda: 'id(wifi_stop_seek_time_count) = 0;'
     - delay: 2s
-    - button.press: display_ip
-    - lambda: |-
-        id(wifi_stop_seek_time_count) = 0;
+    - if:
+        condition:
+          lambda: 'return id(wifi_ip).state != "192.168.4.1";'
+        then:
+          - button.press: display_ip
     - script.execute: sync_the_time
   on_disconnect:
     - if:
