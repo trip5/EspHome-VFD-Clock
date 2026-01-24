@@ -9,10 +9,6 @@ substitutions:
   # Custom characters: Unicode character:column1,column2,column3,column4,column5 (binary painting from bottom to top)
   custom: "α:120,68,36,24,100;ά:120,68,38,31,100;ε:28,42,42,34,20;ι:0,0,60,32,16;ί:0,0,58,33,16;τ:4,4,60,36,20;έ:28,42,42,35,21;υ:28,32,32,32,60;υ:30,32,32,32,30;σ:28,34,34,34,30;30;ώ:30,32,26,33,30;ή:56,4,6,5,120;η:62,4,2,2,124;Φ:28,34,127,34,28;λ:65,54,8,48,64;Σ:65,99,85,73,65;Δ:112,78,65,78,112;ς:12,18,18,18,98;Π:127,1,1,1,127;π:4,124,4,124,4;β:126,37,37,37,26;"
 
-  # Note that other displays are untested and maybe unknown so...?
-  replace: ""
-  custom: ""
-
 # Special notes:
 # Greek has not been eyeballed by an actual Greek person - if you can help, thank you!  I'm sure many look terrible - sorry!
 # Months would not display correctly if using more than 8 replacement characters at once (Φεβρουάριος & Σεπτέμβριος have 11 characters so some replacements needed: ο:o & ρ:p)

@@ -9,10 +9,6 @@ substitutions:
   # Custom characters: Unicode character:column1,column2,column3,column4,column5 (binary painting from bottom to top)
   custom: "ά:120,68,38,31,100;ε:28,42,42,34,20;ι:0,0,60,32,16;ί:0,0,58,33,16;κ:0,60,8,52,0;τ:4,4,60,36,20;έ:28,42,42,35,21;υ:28,32,32,32,60;υ:30,32,32,32,30;σ:28,34,34,34,30;μ:62,32,32,32,30;ώ:30,32,26,33,30;ή:56,4,6,5,120;η:62,4,2,2,124;ς:12,18,18,18,98;π:4,124,4,124,4;"
 
-  # Note that other displays are untested and maybe unknown so...?
-  replace: ""
-  custom: ""
-
 # Special note:
 # Greek has not been eyeballed by an actual Greek person - if you can help, thank you!  I'm sure many look terrible - sorry!
 

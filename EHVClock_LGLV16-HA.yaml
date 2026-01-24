@@ -1,11 +1,17 @@
+# Derived from EHVClock-HA.yaml with yaml-derive.py for LGLV16 Clock - this file is not the master file
+
 # My github: https://github.com/trip5
+
+# Please note that this file can be hand-edited but thanks to simple machine-readable instructions, can also be passed through a script to generate a derivative YAML
+# When deriving the YAML for the LGLV16 Clock, the script checks for certain styles of comments and perform actions.  Check the yaml-derive.py script for more information.
+
 substitutions:
   name: "vfd16-clock-ha"
   friendly_name: "VFD16-Clock-HA"
-  comment: "EHVClock from Trip5"
-  project_name: "Trip5.EspHomeVfdClock_LGLV16-HA"
+  comment: "EHVClock-HA from Trip5"
+  project_name: "Trip5.EspHomeVfdClock-HA"
   project_version: "2026.01.22"
-  waiting: "EHVClock_LGLV16-HA" # shows when waiting for time
+  waiting: "EHVClock-HA" # shows when waiting for time
 
   # Time zone must be POSIX format: (ie "KST-9" & "PST8PDT,M3.2.0/2:00:00,M11.1.0/2:00:00" & "AST4ADT,M3.2.0,M11.1.0")
   # A full list can be viewed here: https://github.com/trip5/timezones.json/blob/master/timezones.md
@@ -19,10 +25,11 @@ substitutions:
   # time_format: "%H:%M" (13:25) / "%H:%M:%S" (13:25:59) / "%I:%M%p" (01:25PM) / "%l:%M%p" (1:25PM)
   time_format12: "%l:%M:%S%p" # 1:25:59PM
   time_format24: "%H:%M:%S" # 01:25:59
+
   # date_format: "%m.%d" (02.28) / "%y.%m.%d" (23.02.28) / "%b %d" (Feb 08) / "%a %d" (Tue 08)
-  date_format: "%B %d" # May 23
-  # date_formatA, if turned on, will split the time of the date display with the main date (and occur before):
-  date_formatA: "%Y %a" # 2025 Fri
+  # date_formatA, if turned on, will split the time of the date display with the main date (and occur before)
+  date_format: "%B %d" # January 23
+  date_formatA: "%Y %A" # 2025 Friday
   # Special note that ESPHome can't seem to use any locale for time other than English. In the text_sensors section, you can find filters that allow substitutions.
   # Please be sure to add those needed characters to the Replace or Custom characters as well, or those special characters will not be displayed!
 
@@ -38,19 +45,21 @@ substitutions:
   clk_pin: GPIO14
   mosi_pin: GPIO13
   cs_pin: GPIO15
+
   # Pins & config for I2C RTC
   sda_pin: GPIO4
   scl_pin: GPIO5
   rtc_address: "0x32"
   i2c_frequency: "400kHz"
-  # Other Pins
+
+  # Button & LED Pins
   status_led_pin: GPIO2 # if you want to use square button, change this to something safe like GPOIO9
   # button_square_pin: GPIO2 # unusable due to being on the same pin as the LED
   button_triangle_pin: GPIO0
   button_circle_pin: GPIO16
 
   # Display Options
-  digits: "16" # How many digits (driver supports 6, 8, or 16)
+  digits: "16"
   intensity: "200" # Initial brightness 0 to 255 (default: 200)
   remove_spaces: "true" # remove leading or trailing spaces (default: false)
   scroll_delay: "500, 500" # optional initial & subsequent delays when scrolling (in milliseconds) (default: 1500, 500) (first text = both numbers combined)
@@ -95,7 +104,7 @@ wifi:
     - light.turn_off: led1
 
 external_components:
-# Use Trip5's VFDClock VFD ESPHome Component (for the Display)
+# Use Trip5's VFD ESPHome Component (for the Display)
   - source:
       type: git
       url: https://github.com/trip5/EspHome-VFD-Clock
@@ -147,7 +156,7 @@ script:
           condition:
             switch.is_off: tz_alt_auto
           then:
-           - lambda: |-
+            - lambda: |-
                 if (id(use_ha_time_zones).state && !id(ha_time_zone).state.empty()) {
                   ESP_LOGI("info", "Set Time Zone (From HA)");
                   id(my_time)->set_timezone(id(ha_time_zone).state.c_str());
@@ -262,6 +271,8 @@ ota:
 
 captive_portal:
 
+improv_serial:
+
 text_sensor:
   - platform: template
     id: project_version
@@ -281,8 +292,8 @@ text_sensor:
     filters:
       - lambda: |-
           // Use the format "%p%I:%M:%S" (PM01:25:59) and run filters on it to get 오후1:25:59
-          int offset = 0;
           if (id(hour12_mode).state == 1) {
+            int offset = 0;
             std::time_t tz1time = (id(my_time).now().timestamp + offset);
             std::tm *tz1time_astm = localtime(&tz1time);
             char display_tmdt[20];
@@ -412,9 +423,6 @@ text_sensor:
         - lambda: |-
             ESP_LOGI("info", "HA Time Zone Override Set");
         - script.execute: set_timezone
-    entity_category: diagnostic
-    icon: mdi:home-clock
-    disabled_by_default: true
   - platform: homeassistant
     entity_id: "${ha_time_zone_alt}"
     id: ha_time_zone_alt
@@ -960,7 +968,7 @@ switch:
     name: "Use HA Overrides"
     id: use_ha_time_zones
     restore_mode: RESTORE_DEFAULT_OFF
-    optimistic: True
+    optimistic: true
     turn_on_action:
         - lambda: |-
             ESP_LOGI("info", "Use HA Overrides On");

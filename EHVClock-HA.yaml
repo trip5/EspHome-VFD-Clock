@@ -1,7 +1,15 @@
 # My github: https://github.com/trip5
+
+# Please note that this file can be hand-edited but thanks to simple machine-readable instructions, can also be passed through a script to generate a derivative YAML
+# When deriving the YAML for the LGLV16 Clock, the script checks for certain styles of comments and perform actions.  Check the yaml-derive.py script for more information.
+
 substitutions:
+# VFD Clock: Keep next 2 lines (delete for others)
   name: "vfd-clock-ha"
   friendly_name: "VFD-Clock-HA"
+# LGLV16 Clock: Uncomment next 2 lines
+#  name: "vfd16-clock-ha"
+#  friendly_name: "VFD16-Clock-HA"
   comment: "EHVClock-HA from Trip5"
   project_name: "Trip5.EspHomeVfdClock-HA"
   project_version: "2026.01.22"
@@ -17,12 +25,21 @@ substitutions:
 
   # time and date formats: https://esphome.io/components/time/?highlight=strftime#strftime and https://strftime.org/
   # time_format: "%H:%M" (13:25) / "%H:%M:%S" (13:25:59) / "%I:%M%p" (01:25PM) / "%l:%M%p" (1:25PM)
+# VFD Clock: Keep next 2 lines (delete for others)
   time_format12: "%l:%M%p"
   time_format24: "%H:%M:%S"
+# LGLV16 Clock: Uncomment next 2 lines
+#  time_format12: "%l:%M:%S%p" # 1:25:59PM
+#  time_format24: "%H:%M:%S" # 01:25:59
+
   # date_format: "%m.%d" (02.28) / "%y.%m.%d" (23.02.28) / "%b %d" (Feb 08) / "%a %d" (Tue 08)
+  # date_formatA, if turned on, will split the time of the date display with the main date (and occur before)
+# VFD Clock: Keep next 2 lines (delete for others)
   date_format: "%b %d" # Jan 01
-  # date_formatA, if turned on, will split the time of the date display with the main date (and occur before):
   date_formatA: "%Y %a" # 2025 Fri
+# LGLV16 Clock: Uncomment next 2 lines
+#  date_format: "%B %d" # January 23
+#  date_formatA: "%Y %A" # 2025 Friday
   # Special note that ESPHome can't seem to use any locale for time other than English. In the text_sensors section, you can find filters that allow substitutions.
   # Please be sure to add those needed characters to the Replace or Custom characters as well, or those special characters will not be displayed!
 
@@ -35,28 +52,48 @@ substitutions:
   ha_time_zone_alt: "input_text.clock_time_zone_alt"
 
   # Pins for Display
+# VFD Clock: Keep next 4 lines (delete for others)
   clk_pin: GPIO12
   mosi_pin: GPIO14
   cs_pin: GPIO13
   reset_pin: GPIO15 # (solder trace not connected)
+# LGLV16 Clock: Uncomment next 3 lines
+#  clk_pin: GPIO14
+#  mosi_pin: GPIO13
+#  cs_pin: GPIO15
+
   # Pins & config for I2C RTC
+# VFD Clock: Keep next 2 lines (delete for others)
   sda_pin: GPIO5
   scl_pin: GPIO4
+# LGLV16 Clock: Uncomment next 2 lines
+#  sda_pin: GPIO4
+#  scl_pin: GPIO5
   rtc_address: "0x32"
   i2c_frequency: "400kHz"
-  # Other Pins
+
+  # Button & LED Pins
+# VFD Clock: Keep next 2 lines (delete for others)
   status_led_pin: GPIO2
   button_pin: GPIO0
+# LGLV16 Clock: Uncomment next 4 lines
+#  status_led_pin: GPIO2 # if you want to use square button, change this to something safe like GPOIO9
+#  # button_square_pin: GPIO2 # unusable due to being on the same pin as the LED
+#  button_triangle_pin: GPIO0
+#  button_circle_pin: GPIO16
 
   # Display Options
+# VFD Clock: Keep next 1 line (delete for others)
   digits: "8" # How many digits (driver supports 6, 8, or 16)
+# LGLV16 Clock: Uncomment next 1 line
+#  digits: "16"
   intensity: "200" # Initial brightness 0 to 255 (default: 200)
   remove_spaces: "true" # remove leading or trailing spaces (default: false)
   scroll_delay: "500, 500" # optional initial & subsequent delays when scrolling (in milliseconds) (default: 1500, 500) (first text = both numbers combined)
   # Replace characters: Unicode character:Fubata byte (character that already exists on the device: ASCII, decimal, hex, or binary in MSB-LSB order)
   replace: ""
   # Custom characters: Unicode character:column1,column2,column3,column4,column5 (binary painting from bottom to top: can be in decimal or hex too)
-  custom: "°:0,6,9,9,6;₿:62,107,42,107,20;금:117,85,85,85,119;목:55,53,61,53,119;수:20,18,113,18,20;오:34,37,61,37,34;요:34,61,37,61,34;월:38,45,102,72,95;일:18,21,114,64,71;전:121,71,89,68,95;토:95,85,117,85,81;화:22,123,22,127,8;후:38,42,107,42,38"
+  custom: "°:0,6,9,9,6;₿:62,107,42,107,20;금:117,85,85,85,119;목:55,53,61,53,119;수:20,18,113,18,20;오:34,37,61,37,34;요:34,61,37,61,34;월:38,45,102,72,95;일:18,21,114,64,71;전:121,71,89,68,95;토:95,85,117,85,81;화:22,123,22,127,8;후:38,42,107,42,38;년:31,112,90,74,95"
 
 esphome:
   name: "${name}"
@@ -261,6 +298,8 @@ ota:
 
 captive_portal:
 
+improv_serial:
+
 text_sensor:
   - platform: template
     id: project_version
@@ -278,6 +317,7 @@ text_sensor:
     update_interval: never
     internal: true
     filters:
+# VFD Clock: Keep next 13 lines (delete for others)
       - lambda: |-
           // Use the format "%p%I:%M" (PM 1:25) and run filters on it to get 오후1:25
           if (id(hour12_mode).state == 1) {
@@ -291,6 +331,20 @@ text_sensor:
           } else {
             return x;
           }
+# LGLV16 Clock: Uncomment next 13 lines
+#      - lambda: |-
+#          // Use the format "%p%I:%M:%S" (PM01:25:59) and run filters on it to get 오후1:25:59
+#          if (id(hour12_mode).state == 1) {
+#            int offset = 0;
+#            std::time_t tz1time = (id(my_time).now().timestamp + offset);
+#            std::tm *tz1time_astm = localtime(&tz1time);
+#            char display_tmdt[20];
+#            strftime(display_tmdt, 20, "%p%I:%M:%S", tz1time_astm);
+#            std::string tmdt(display_tmdt);
+#            return tmdt;
+#          } else {
+#            return x;
+#          }
       - append: ""
       - prepend: ""
       - substitute:
@@ -304,6 +358,7 @@ text_sensor:
     update_interval: never
     internal: true
     filters:
+# VFD Clock: Keep next 9 lines (delete for others)
       - lambda: |-
           // Use the format "%b %d" (May 23) and run filters on it to get 05월 23일
           int offset = 0;
@@ -313,9 +368,20 @@ text_sensor:
           strftime(display_tmdt, 20, "%b %d", tz1time_astm);
           std::string tmdt(display_tmdt);
           return tmdt;
+# LGLV16 Clock: Uncomment next 9 lines
+#      - lambda: |-
+#          // Use the format "%Y! %b %d" (2025! May 23) and run filters on it to get 2025년 5월 23일
+#          int offset = 0;
+#          std::time_t tz1time = (id(my_time).now().timestamp + offset);
+#          std::tm *tz1time_astm = localtime(&tz1time);
+#          char display_tmdt[20];
+#          strftime(display_tmdt, 20, "%Y! %b %d", tz1time_astm);
+#          std::string tmdt(display_tmdt);
+#          return tmdt;
       - append: "일"
       - prepend: ""
       - substitute:
+        - "! -> 년"
         - "Jan -> 1월"
         - "Feb -> 2월"
         - "Mar -> 3월"
@@ -467,6 +533,7 @@ spi:
 binary_sensor:
   - platform: status
     name: "Status"
+# VFD Clock: Keep next 41 lines (delete for others)
   - platform: gpio
     pin: 
       number: ${button_pin}
@@ -508,12 +575,68 @@ binary_sensor:
           - ON for at least 5s
         then:
           - switch.toggle: auto_replace_tz_alt
+# LGLV16 Clock: Uncomment next 54 lines
+#  - platform: gpio
+#    pin: 
+#      number: ${button_triangle_pin}
+#      inverted: true
+#      mode:
+#        input: true
+#        pullup: true
+#    name: "Button Triangle"
+#    filters:
+#      - delayed_on: 10ms
+#      - delayed_off: 10ms
+#    on_multi_click:
+#      #Click ▲ will toggle Date display mode
+#      - timing:
+#          - ON for at most 0.5s
+#          - OFF for at least 0.5s
+#        then:
+#          - switch.toggle: date_display_mode
+#      #Double-Click ▲ will toggle 12-hour mode
+#      - timing:  
+#          - ON for at most 1s
+#          - OFF for at most 0.5s
+#          - ON for at most 1s
+#          - OFF for at least 0.1s
+#        then:
+#          - switch.toggle: hour12_mode
+#  - platform: gpio
+#    pin: 
+#      number: ${button_circle_pin}
+#      inverted: true
+#    name: "Button Circle"
+#    filters:
+#      - delayed_on: 10ms
+#      - delayed_off: 10ms
+#    on_multi_click:
+#      #Click ⬤ will toggle toggle Alt Time Zone
+#      - timing:
+#          - ON for at most 0.5s
+#          - OFF for at least 0.5s
+#        then:
+#          - switch.toggle: tz_alt
+#      #Double-click ⬤ will toggle Time/Date Text Replacement
+#      - timing:
+#          - ON for at most 1s
+#          - OFF for at most 0.5s
+#          - ON for at most 1s
+#          - OFF for at least 0.1s
+#        then:
+#          - switch.toggle: replace_mode
+#      #Hold ⬤ 5s will will toggle Auto Replacement = Alt. Time
+#      - timing:
+#          - ON for at least 5s
+#        then:
+#          - switch.toggle: auto_replace_tz_alt
 
 display:
   - platform: vfd
     id: vf_display
     digits: ${digits}
     cs_pin: ${cs_pin}
+# VFD Clock: Keep next 1 line (delete for others)
     reset_pin: ${reset_pin}
     intensity: ${intensity}
     remove_spaces: ${remove_spaces}

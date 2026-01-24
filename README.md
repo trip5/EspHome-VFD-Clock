@@ -1,4 +1,8 @@
+![image](./images/EHVC.png)
+
 # EspHome-VFD-Clock
+
+***This documentation is the same on the [Github Page](https://trip5.github.io/EspHome-VFD-Clock/), which may be easier to read than the [Github Repository](https://github.com/trip5/EspHome-VFD-Clock).***
 
 EHVC is meant to be used on ESP-based VFD (Vacuum Fluorescent Display) Clocks using ESPHome.
 So far, it works with the appropriately named VFD Clock and the LGL Studio V16
@@ -17,6 +21,7 @@ Due to memory constraints on the ESP8266 these clocks use, I've decided to split
 
 ---
 
+<!--
 ## New to ESPHome?
 
 Try following this step-by-step guide to compiling a YAML:
@@ -24,6 +29,7 @@ Try following this step-by-step guide to compiling a YAML:
 
 This guide is proposed for the ESPHome documentation and if you find it helpful, it would be great if you could leave a comment in the
 [Pull Request](https://github.com/esphome/esphome-docs/pull/4411) to get them added to the ESPHome Docs officially.
+-->
 
 ### New to Flashing a Device?
 
@@ -50,7 +56,9 @@ https://www.aliexpress.com/item/1005004267634532.html
 As well as a link for the original maker:
 https://lglstudio.com/products/lgl-vck-cccp-v16
 
-### Flashing Pins
+### Flashing
+
+You can use ESPHome to make it completely custom or you can use my [Web Tool](https://trip5.github.io/EspHome-VFD-Clock/firmware.html).
 
 #### 8-Character VFD Clock
 
@@ -165,10 +173,11 @@ Time can be synced to the Internet at configurable intervals between 1 - 24 hour
 
 ## Non-HA Version
 
-The files [`EHVClock.yaml`](EHVClock.yaml) and [`EHVClock_LGLV16.yaml`](EHVClock_LGLV16.yaml) contains functions useful for using the clock as...
-mostly just a clock but with some power-saving functions.
+The file [`EHVClock.yaml`](EHVClock.yaml) contains functions useful for using the VFD Clock as... mostly just a clock but with some power-saving functions.
 It includes all of the functions above as well as these below.  This version has a WebUI which can be accessed via it's IP after connecting the clock to Wifi.
 So if you need a travel clock, this may be the ideal one for you.  It can still be controlled by Home Assistant as well but is not dependent on it to function.
+
+The file [`EHVClock_LGLV16.yaml`](EHVClock_LGLV16.yaml) is derived from the above master file for the LGL Studio V16 Clock.
 
 Please note that unlike LED-based clocks, a VFD uses a significant amount of power, so it would be very unwise to run this clock from a battery
 with the display always-on.  Take a look at power consumption in the [Power Consumption](#power-consumption) section below.
@@ -258,9 +267,10 @@ You could consider hosting the file on another machine in-house, too by using so
 
 ## Home Assistant Version
 
-The file [`EHVClock-HA.yaml`](EHVClock-HA.yaml) and [`EHVClock_LGLV16-HA.yaml`](EHVClock_LGLV16-HA.yaml)
-contain functions useful for using the clock with Home Assistant.
+The file [`EHVClock-HA.yaml`](EHVClock-HA.yaml) contains functions useful for using the clock with Home Assistant.
 It does not include the WebUI, Time Zone Offset, Time Zone POSIX, or Wifi Stop Seek but it does includes all of the functions below.
+
+The file [`EHVClock_LGLV16-HA.yaml`](EHVClock_LGLV16-HA.yaml) is derived from the above master file for the LGL Studio V16 Clock.
 
 ### Alternate Time Zone
 
@@ -429,7 +439,8 @@ it.strftime(const char *format, ESPTime time) __attribute__((format(strftime, 2,
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
-| 2026.01.22 | Added POSIX Alt Time Zone to non-HA version and overrides to HA version, removed device's friendly name from entities, mdi icons added, various fixes |
+| 2026.01.24 | Re-introduced variant YAML files with `yaml-derive.py`, minor fixes, Github page added with mkdocs and web flashing tool |
+| 2026.01.22 | Added POSIX to non-HA version and overrides to HA version, removed device's friendly name from entities, mdi icons & improv serial added, various fixes |
 | 2025.05.25 | Added YAMLs for LGL Studio V16, language_filters hugely improved |
 | 2024.12.09 | Recoded to remove many global variables, relying on numbers and switches where possible, hard-coded variables removed |
 | 2024.11.11 | Display Off routine fix, power measurements complete |

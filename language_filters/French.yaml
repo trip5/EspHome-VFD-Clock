@@ -5,9 +5,6 @@ substitutions:
   # for 8-MD-06INKM (VFD-Clock) - only 2 characters are needed: éû
   replace: "é:130;û:158;"
 
-  # Note that other displays are untested and maybe unknown so use replace with un-accented characters for now
-  replace: "é:e;û:u;"
-
   # Custom characters: Unicode character:column1,column2,column3,column4,column5 (binary painting from bottom to top)
   custom: "" # still required, even if blank!!
 
