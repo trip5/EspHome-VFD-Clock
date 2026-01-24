@@ -203,11 +203,18 @@ jobs:
           for bin_file in firmware/*.bin; do
             if [ -f "$bin_file" ]; then
               filename=$(basename "$bin_file")
-              if [[ "$filename" == *"-HA.bin" ]]; then
+              # Check for LGLV16 variants first
+              if [[ "$filename" == EHVClock_LGLV16-*-HA.bin ]]; then
+                lang_name=$(echo "$filename" | sed 's/EHVClock_LGLV16-\(.*\)-HA\.bin/\1/')
+                variant_id="LGLV16-${lang_name}-HA"
+              elif [[ "$filename" == EHVClock_LGLV16-*.bin ]]; then
+                lang_name=$(echo "$filename" | sed 's/EHVClock_LGLV16-\(.*\)\.bin/\1/')
+                variant_id="LGLV16-${lang_name}"
+              elif [[ "$filename" == *-HA.bin ]]; then
                 lang_name=$(echo "$filename" | sed 's/EHVClock-\(.*\)-HA\.bin/\1/')
                 variant_id="${lang_name}-HA"
               else
-                lang_name=$(echo "$filename" | sed 's/EHVClock-\([^.]*\)\.bin/\1/')
+                lang_name=$(echo "$filename" | sed 's/EHVClock-\(.*\)\.bin/\1/')
                 variant_id="${lang_name}"
               fi
               manifest_file="docs/manifests/${variant_id}-manifest.json"
@@ -241,12 +248,21 @@ jobs:
           for bin_file in firmware/*.bin; do
             if [ -f "$bin_file" ]; then
               filename=$(basename "$bin_file")
-              if [[ "$filename" == *"-HA.bin" ]]; then
+              # Check for LGLV16 variants first
+              if [[ "$filename" == EHVClock_LGLV16-*-HA.bin ]]; then
+                lang_name=$(echo "$filename" | sed 's/EHVClock_LGLV16-\(.*\)-HA\.bin/\1/')
+                display_name="LGLV16 ${lang_name} - Home Assistant"
+                variant_id="LGLV16-${lang_name}-HA"
+              elif [[ "$filename" == EHVClock_LGLV16-*.bin ]]; then
+                lang_name=$(echo "$filename" | sed 's/EHVClock_LGLV16-\(.*\)\.bin/\1/')
+                display_name="LGLV16 ${lang_name}"
+                variant_id="LGLV16-${lang_name}"
+              elif [[ "$filename" == *-HA.bin ]]; then
                 lang_name=$(echo "$filename" | sed 's/EHVClock-\(.*\)-HA\.bin/\1/')
                 display_name="${lang_name} - Home Assistant"
                 variant_id="${lang_name}-HA"
               else
-                lang_name=$(echo "$filename" | sed 's/EHVClock-\([^.]*\)\.bin/\1/')
+                lang_name=$(echo "$filename" | sed 's/EHVClock-\(.*\)\.bin/\1/')
                 display_name="${lang_name}"
                 variant_id="${lang_name}"
               fi

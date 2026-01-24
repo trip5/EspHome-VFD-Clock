@@ -193,7 +193,7 @@ It is possible to set an offset like 0.01 (which would be 36 seconds).  Be caref
 ### Time Zone POSIX
 
 Thanks to [andrewjswan](https://github.com/andrewjswan) for the idea to make the time zone editable directly in the WebUI.
-It must be in POSIX format (see notes below).  Don't forget to hit enter to make it stick.
+It must be in POSIX format (see [notes](#posix-time-strings) below).  Don't forget to hit enter to make it stick.
 
 ### Wifi Stop Seek
 
@@ -365,7 +365,8 @@ There is a speaker on GPIO12.  Alarms may be implemented in a future update.
 
 I could not find any custom component to support the Futaba 8-MD-06INKM Display that is part of the VFD Clock.  I found more than a few Micropython and
 Arduino drivers including [sfxfs's driver](https://github.com/sfxfs/ESP32-VFD-8DM-Arduino/) which formed the foundation of the lower functions of my driver
-I also had to look at the official drivers for [Max7219](https://esphome.io/api/max7219_8cpp_source) and [Max7219Digit](https://esphome.io/api/max7219digit_8cpp_source) because this clock includes both inbuilt fonts and the ability to use the dot-matrix.
+I also had to look at the official drivers for [Max7219](https://esphome.io/api/max7219_8cpp_source) and [Max7219Digit](https://esphome.io/api/max7219digit_8cpp_source)
+because this clock includes both inbuilt fonts and the ability to use the dot-matrix.
 
 This driver supports more than just VFDs than the 8-MD-06INKM, but certain parts may need updating to function correctly.
 The reason it can be used for other displays is because most VFDs adhere to the Hitachi HD44780 standard (except for higher-byte characters),
