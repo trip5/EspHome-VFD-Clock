@@ -115,7 +115,8 @@ wifi:
     ap_timeout: 10s # this has to be short, especially if using Stop Seek Wifi
   on_connect:
     - logger.log: "Wifi connected"
-    - light.turn_off: led1    - lambda: 'id(wifi_stop_seek_time_count) = 0;'
+    - light.turn_off: led1
+    - lambda: 'id(wifi_stop_seek_time_count) = 0;'
     - delay: 2s
     - if:
         condition:
