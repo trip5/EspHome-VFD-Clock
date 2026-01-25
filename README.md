@@ -21,22 +21,6 @@ Due to memory constraints on the ESP8266 these clocks use, I've decided to split
 
 ---
 
-<!--
-## New to ESPHome?
-
-Try following this step-by-step guide to compiling a YAML:
-[Beginner's Guide to Adding Devices](https://deploy-preview-4411--esphome.netlify.app/guides/beginners_guide_adding_devices)
-
-This guide is proposed for the ESPHome documentation and if you find it helpful, it would be great if you could leave a comment in the
-[Pull Request](https://github.com/esphome/esphome-docs/pull/4411) to get them added to the ESPHome Docs officially.
--->
-
-### New to Flashing a Device?
-
-Please read this: [Physically Connecting to your Device](https://esphome.io/guides/physical_device_connection).
-
----
-
 ## VFD clocks
 
 ### 8-Character VFD Clock
@@ -71,6 +55,25 @@ Don't forget to connect GPIO0 to GND when first connecting to your serial flashe
 GPIO0 is not exposed here but it is connected to the ▲ button so hold this button while powering-on.  Dupont male ends fit nicely (as do pin headers).
 
 ![image](./images/LGLStudioV16-Pins.jpg)
+
+
+<!--
+
+---
+
+## New to ESPHome?
+
+Try following this step-by-step guide to compiling a YAML:
+[Beginner's Guide to Adding Devices](https://deploy-preview-4411--esphome.netlify.app/guides/beginners_guide_adding_devices)
+
+This guide is proposed for the ESPHome documentation and if you find it helpful, it would be great if you could leave a comment in the
+[Pull Request](https://github.com/esphome/esphome-docs/pull/4411) to get them added to the ESPHome Docs officially.
+
+-->
+
+### New to Flashing a Device?
+
+You can read this: [Physically Connecting to your Device](https://esphome.io/guides/physical_device_connection) but with this device, you can use it's inbuilt USB port.
 
 ---
 
