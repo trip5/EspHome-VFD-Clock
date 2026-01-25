@@ -50,12 +50,17 @@ Don't forget to connect GPIO0 to GND when first connecting to your serial flashe
 
 ![image](./images/VFD-Clock-Pins.jpg)
 
+A JST1.25mm header should fit nicely if you want a DIY quick-connector... or you can use sewing needles.
+
+![image](./images/JST1.25mm.jpg)
+
 #### 16-Character LGL Studio V16
 
-GPIO0 is not exposed here but it is connected to the ▲ button so hold this button while powering-on.  Dupont male ends fit nicely (as do pin headers).
+GPIO0 is not exposed here but it is connected to the ▲ button so hold this button while powering-on.
 
 ![image](./images/LGLStudioV16-Pins.jpg)
 
+2.54mm pin headers fit nicely (duPont male connectors will kind of work).
 
 <!--
 
