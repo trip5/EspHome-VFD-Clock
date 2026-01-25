@@ -1,6 +1,6 @@
 {
   "name": "EspHome-VFD-Clock",
-  "version": "2026.01.24",
+  "version": "2026.01.25",
   "home_assistant_domain": "esphome",
   "funding_url": "https://github.com/sponsors/trip5",
   "builds": [

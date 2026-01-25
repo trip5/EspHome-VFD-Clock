@@ -1,7 +1,7 @@
 {
   "project": "EspHome-VFD-Clock",
-  "version": "2026.01.24",
-  "build_date": "2026-01-25 20:35:01 UTC",
+  "version": "2026.01.25",
+  "build_date": "2026-01-25 22:47:01 UTC",
   "variants": [
   {
     "name": "Chinese - Home Assistant",
