@@ -2,7 +2,7 @@
 
 # EspHome-VFD-Clock
 
-***This documentation is the same on the [Github Page](https://trip5.github.io/EspHome-VFD-Clock/), which may be easier to read than the [Github Repository](https://github.com/trip5/EspHome-VFD-Clock).***
+***This documentation is the same on the [Github Page](https://trip5.github.io/EspHome-VFD-Clock/), which may be easier to read.***
 
 EHVC is meant to be used on ESP-based VFD (Vacuum Fluorescent Display) Clocks using ESPHome.
 So far, it works with the appropriately named VFD Clock and the LGL Studio V16
