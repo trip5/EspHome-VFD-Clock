@@ -149,25 +149,25 @@ There is also an option called Replacement Interval by which you can make your c
 It will automatically turn on/off the substitution every number of times the date is displayed, if the date is displayed.
 If the date display is off, the automatic replacement will be made after the time specified by Date Display Time (multiplied by the Date Display Interval).
 
-#### 8-Character Clock
+#### VFD Clock
 
 ![image](./images/VFD-Clock-Korean-demo.gif)
 
-Check the [language filters](./language_filters/) folder for some examples.  So far there is:
+Check the [language filters](language_filters/) folder for some examples.  So far there is:
 [`Korean`](language_filters/Korean.yaml) &
 [`French`](language_filters/French.yaml) &
 [`Greek`](language_filters/Greek.yaml) &
 [`Chinese`](language_filters/Chinese.yaml)
 
-#### 16-Character Clock
+#### LGLV16 Clock
 
 ![image](./images/LGLStudioV16-Chinese-demo.gif)
 
-Check the [language filters](./language_filters/) folder for some examples.  So far there is:
-[`Korean`](language_filters/Korean_16.yaml) &
-[`French`](language_filters/French_16.yaml) &
-[`Greek`](language_filters/Greek_16.yaml) &
-[`Chinese`](language_filters/Chinese_16.yaml)
+Check the [language filters](/language_filters/) folder for some examples.  So far there is:
+[`Korean`](language_filters/Korean_LGLV16.yaml) &
+[`French`](language_filters/French_LGLV16.yaml) &
+[`Greek`](language_filters/Greek_LGLV16.yaml) &
+[`Chinese`](language_filters/Chinese_LGLV16.yaml)
 
 Please note that because this clock does not use fonts, you may have to design your own.
 The function to create your own characters is part of the VFD custom component.
