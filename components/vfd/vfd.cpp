@@ -41,7 +41,7 @@ void VFDComponent::setup() // from void VFD_Display::init() const
   this->en_pin_toggle(true);
   this->reset_pin_toggle();
   this->clearscreen();
-  this->enable();
+  //this->enable(); // not required, as setCmd() has it's own enable/disable
   VFD_cmd_t VFD_initcmd[] = {{SET_DISPLAY_TIMING, byte(this->digits_ - 1)},
                              {SET_DIMMING_DATA, this->intensity_},
                              {SET_DISPLAY_LIGHT_ON, EMPTY_DATA}};
