@@ -153,7 +153,7 @@ If the date display is off, the automatic replacement will be made after the tim
 
 ![image](./images/VFD-Clock-Korean-demo.gif)
 
-Check the [language filters](language_filters/) folder for some examples.  So far there is:
+Check the [language filters](https://github.com/trip5/EspHome-VFD-Clock/tree/main/language_filters) folder for some examples.  So far there is:
 [`Korean`](language_filters/Korean.yaml) &
 [`French`](language_filters/French.yaml) &
 [`Greek`](language_filters/Greek.yaml) &
@@ -163,7 +163,7 @@ Check the [language filters](language_filters/) folder for some examples.  So fa
 
 ![image](./images/LGLStudioV16-Chinese-demo.gif)
 
-Check the [language filters](/language_filters/) folder for some examples.  So far there is:
+Check the [language filters](https://github.com/trip5/EspHome-VFD-Clock/tree/main/language_filters) folder for some examples.  So far there is:
 [`Korean`](language_filters/Korean_LGLV16.yaml) &
 [`French`](language_filters/French_LGLV16.yaml) &
 [`Greek`](language_filters/Greek_LGLV16.yaml) &
