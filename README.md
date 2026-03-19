@@ -460,6 +460,7 @@ it.strftime(const char *format, ESPTime time) __attribute__((format(strftime, 2,
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2026.03.18 | Watchdog reset fix (likely an ESP32/ESP-IDF issue) [PR 5](https://github.com/trip5/EspHome-VFD-Clock/pull/5) solves [Issue 4](https://github.com/trip5/EspHome-VFD-Clock/issues/4) - thanks [Angus71](https://github.com/Angus71)! |
 | 2025.05.24 | Component renamed to 'vfd', re-factored to fix 8 custom characters (previously 7), fixed `digits` to accept 6 or 8 or 16, `reset_pin` and `en_pin` will accept "", replace can be ASCII |
 | 2024.12.09 | Scroll text initial delay fix (initial delay was starting without displaying) |
 | 2024.10.26 | Support for Futaba 8-MD-06INKM display |
