@@ -332,8 +332,14 @@ If you need to make a custom POSIX format you can look [`here`](https://develope
 
 ### OTA Update Can Be Buggy
 
-Because these devices save preferences to flash, updates that introduce new features (which I do often) may fragment the storage space, causing strange behavior.
+Because these devices save preferences to flash, updates that introduce new features may fragment the storage space, causing strange behavior.
 It's always best to fully erase and re-flash when upgrading the version of the firmware.
+
+### Connecting to A New Wi-Fi
+
+When failing to connect to the wireless network, the device will enter AP mode.  Connect to the device's hotspot with your phone and open a browser if you don't get a pop-up directing you.
+
+Typically, visiting `http://192.168.4.1` is enough to enter the wiresless configuration screen.  If the device has wi-fi credentials but they are invalid, this screen may show the WebUI instead.  Try visiting an unhandled endpoint like `http://192.168.4.1/wifi` (almost anything will work here).
 
 ### Flash Size of 8-Character Clock
 
@@ -461,6 +467,7 @@ it.strftime(const char *format, ESPTime time) __attribute__((format(strftime, 2,
 
 | Date       | Release Notes    |
 | ---------- | ---------------- |
+| 2026.04.01 | rx8025 component updated (minor) |
 | 2026.03.18 | Watchdog reset fix (likely an ESP32/ESP-IDF issue) [PR 5](https://github.com/trip5/EspHome-VFD-Clock/pull/5) solves [Issue 4](https://github.com/trip5/EspHome-VFD-Clock/issues/4) - thanks [Angus71](https://github.com/Angus71)! |
 | 2025.05.24 | Component renamed to 'vfd', re-factored to fix 8 custom characters (previously 7), fixed `digits` to accept 6 or 8 or 16, `reset_pin` and `en_pin` will accept "", replace can be ASCII |
 | 2024.12.09 | Scroll text initial delay fix (initial delay was starting without displaying) |
