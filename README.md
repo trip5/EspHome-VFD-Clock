@@ -338,12 +338,6 @@ If you need to make a custom POSIX format you can look [`here`](https://develope
 Because these devices save preferences to flash, updates that introduce new features may fragment the storage space, causing strange behavior.
 It's always best to fully erase and re-flash when upgrading the version of the firmware.
 
-### Connecting to A New Wi-Fi
-
-When failing to connect to the wireless network, the device will enter AP mode.  Connect to the device's hotspot with your phone and open a browser if you don't get a pop-up directing you.
-
-Typically, visiting `http://192.168.4.1` is enough to enter the wiresless configuration screen.  If the device has wi-fi credentials but they are invalid, this screen may show the WebUI instead.  Try visiting an unhandled endpoint like `http://192.168.4.1/wifi` (almost anything will work here).
-
 ### Flash Size of 8-Character Clock
 
 It has come to my attention that certain clocks have what could be a fake ESP-12H stamp on the back.  My clocks all have an ESP-12F (an "upgraded" version of the ESP-12E) with 4M of flash memory. An ESP-12H should have 2M of flash but these only have 1M of flash memory! They look like this:
