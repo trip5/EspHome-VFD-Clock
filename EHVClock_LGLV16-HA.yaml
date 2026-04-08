@@ -10,7 +10,7 @@ substitutions:
   friendly_name: "VFD16-Clock-HA"
   comment: "EHVClock-HA from Trip5"
   project_name: "Trip5.EspHomeVfdClock-HA"
-  project_version: "2026.01.25"
+  project_version: "2026.04.08"
   waiting: "EHVClock-HA" # shows when waiting for time
 
   # Time zone must be POSIX format: (ie "KST-9" & "PST8PDT,M3.2.0/2:00:00,M11.1.0/2:00:00" & "AST4ADT,M3.2.0,M11.1.0")
@@ -61,7 +61,7 @@ substitutions:
   # Display Options
   digits: "16"
   intensity: "200" # Initial brightness 0 to 255 (default: 200)
-  remove_spaces: "true" # remove leading or trailing spaces (default: false)
+  remove_spaces: "false" # remove leading or trailing spaces (default: false)
   scroll_delay: "500, 500" # optional initial & subsequent delays when scrolling (in milliseconds) (default: 1500, 500) (first text = both numbers combined)
   # Replace characters: Unicode character:Fubata byte (character that already exists on the device: ASCII, decimal, hex, or binary in MSB-LSB order)
   replace: ""
@@ -228,21 +228,21 @@ logger:
   level: NONE
 # Logging is disabled to save memory but you can easily enable logging (and stop the various sensors/switches from spamming the log) by deleting the above line and uncommenting the lines below
 # Note that increasing the level uses up memory (which this device has very little available) and may cause errors and/or crashing - please note it's also disabled in the web_server section
-#  level: INFO
+#  level: DEBUG
 #  logs:
 #    sensor: ERROR
-#    text_sensor: NONE
+#    text_sensor: ERROR
 #    switch: NONE
 #    light: NONE
-#    number: NONE
+#    number: ERROR
 
 # Web Server is disabled due to memory constraints.  Enable at your own risk (consider removing captive_portal)
 #web_server:
 #  port: 80
 #  # ota: false # true by default
 #  include_internal: false # true will expose more than needed to the Web UI
-#  version: 2 # version 3 is much larger but possible if local is false
-#  local: true # will download www.js and serve it directly from the clock
+#  version: 2 # version 3 is more efficient but cuts off many field names
+#  # local: true # will download www.js and serve it directly from the clock (may break the Web UI)
 #  log: false # disabling in the WebUI to save memory
 
 ota:
@@ -293,8 +293,7 @@ text_sensor:
       - lambda: |-
           // Use the format "%p%I:%M:%S" (PM01:25:59) and run filters on it to get 오후1:25:59
           if (id(hour12_mode).state == 1) {
-            int offset = 0;
-            std::time_t tz1time = (id(my_time).now().timestamp + offset);
+            std::time_t tz1time = (id(my_time).now().timestamp);
             std::tm *tz1time_astm = localtime(&tz1time);
             char display_tmdt[20];
             strftime(display_tmdt, 20, "%p%I:%M:%S", tz1time_astm);
@@ -318,8 +317,7 @@ text_sensor:
     filters:
       - lambda: |-
           // Use the format "%Y! %b %d" (2025! May 23) and run filters on it to get 2025년 5월 23일
-          int offset = 0;
-          std::time_t tz1time = (id(my_time).now().timestamp + offset);
+          std::time_t tz1time = (id(my_time).now().timestamp);
           std::tm *tz1time_astm = localtime(&tz1time);
           char display_tmdt[20];
           strftime(display_tmdt, 20, "%Y! %b %d", tz1time_astm);
@@ -350,8 +348,7 @@ text_sensor:
     filters:
       - lambda: |-
           // Use the format "%a" (Fri) and run filters on it to get 금요일
-          int offset = 0;
-          std::time_t tz1time = (id(my_time).now().timestamp + offset);
+          std::time_t tz1time = (id(my_time).now().timestamp);
           std::tm *tz1time_astm = localtime(&tz1time);
           char display_tmdt[20];
           strftime(display_tmdt, 20, "%a", tz1time_astm);
@@ -720,7 +717,6 @@ display:
                 id(ha_sensor_data_now) = 1;
               }
               // check if Replace Interval is active, count or reset, when date display is finished - or after the interval, depending
-              // ...and trip the boolean to display HA sensors
               if (id(replace_interval).state > 0) {
                 id(replace_interval_count) += 1;
                 if (id(replace_interval_count) >= id(replace_interval).state) {
