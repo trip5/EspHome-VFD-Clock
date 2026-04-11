@@ -699,15 +699,11 @@ display:
               }
               // show the weather (if it's available)
               if (!id(weather_combined).state.empty()) {
-                id(weather_interval_count) += 1;
-                if (id(weather_interval_count) >= id(weather_interval).state) {
-                  id(weather_interval_count) = 0;
-                  // shortcut: use the 'message' which suspends other counting...
-                  id(message) = id(weather_combined).state.c_str();
-                  id(message_alive_time) = id(weather_display_time_real);
-                  id(message_display_time) = id(weather_display_time_real);
-                  id(message_clock_time) = 0;
-                }
+                // shortcut: use the 'message' which suspends other counting...
+                id(message) = id(weather_combined).state.c_str();
+                id(message_alive_time) = id(weather_display_time_real);
+                id(message_display_time) = id(weather_display_time_real);
+                id(message_clock_time) = 0;
               }
             }
         }
