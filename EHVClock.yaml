@@ -396,8 +396,8 @@ text_sensor:
       - lambda: |-
           // Use the format "%p%I:%M" (PM 1:25) and run filters on it to get 오후1:25
           if (id(hour12_mode).state == 1) {
-            std::time_t tz1time = (id(my_time).now().timestamp);
-            std::tm *tz1time_astm = localtime(&tz1time);
+            std::tm tz1time_tm = id(my_time).now().to_c_tm(); // local time (libc localtime() returns UTC since ESPHome 2026.4)
+            std::tm *tz1time_astm = &tz1time_tm;
             char display_tmdt[20];
             strftime(display_tmdt, 20, "%p%I:%M", tz1time_astm);
             std::string tmdt(display_tmdt);
@@ -409,8 +409,8 @@ text_sensor:
 #      - lambda: |-
 #          // Use the format "%p%I:%M:%S" (PM01:25:59) and run filters on it to get 오후1:25:59
 #          if (id(hour12_mode).state == 1) {
-#            std::time_t tz1time = (id(my_time).now().timestamp);
-#            std::tm *tz1time_astm = localtime(&tz1time);
+#            std::tm tz1time_tm = id(my_time).now().to_c_tm(); // local time (libc localtime() returns UTC since ESPHome 2026.4)
+#            std::tm *tz1time_astm = &tz1time_tm;
 #            char display_tmdt[20];
 #            strftime(display_tmdt, 20, "%p%I:%M:%S", tz1time_astm);
 #            std::string tmdt(display_tmdt);
@@ -434,8 +434,8 @@ text_sensor:
 # VFD Clock: Keep next 8 lines (delete for others)
       - lambda: |-
           // Use the format "%b %d" (May 23) and run filters on it to get 05월 23일
-          std::time_t tz1time = (id(my_time).now().timestamp);
-          std::tm *tz1time_astm = localtime(&tz1time);
+          std::tm tz1time_tm = id(my_time).now().to_c_tm(); // local time (libc localtime() returns UTC since ESPHome 2026.4)
+          std::tm *tz1time_astm = &tz1time_tm;
           char display_tmdt[20];
           strftime(display_tmdt, 20, "%b %d", tz1time_astm);
           std::string tmdt(display_tmdt);
@@ -443,8 +443,8 @@ text_sensor:
 # LGLV16 Clock: Uncomment next 8 lines
 #      - lambda: |-
 #          // Use the format "%Y! %b %d" (2025! May 23) and run filters on it to get 2025년 5월 23일
-#          std::time_t tz1time = (id(my_time).now().timestamp);
-#          std::tm *tz1time_astm = localtime(&tz1time);
+#          std::tm tz1time_tm = id(my_time).now().to_c_tm(); // local time (libc localtime() returns UTC since ESPHome 2026.4)
+#          std::tm *tz1time_astm = &tz1time_tm;
 #          char display_tmdt[20];
 #          strftime(display_tmdt, 20, "%Y! %b %d", tz1time_astm);
 #          std::string tmdt(display_tmdt);
@@ -474,8 +474,8 @@ text_sensor:
     filters:
       - lambda: |-
           // Use the format "%a" (Fri) and run filters on it to get 금요일
-          std::time_t tz1time = (id(my_time).now().timestamp);
-          std::tm *tz1time_astm = localtime(&tz1time);
+          std::tm tz1time_tm = id(my_time).now().to_c_tm(); // local time (libc localtime() returns UTC since ESPHome 2026.4)
+          std::tm *tz1time_astm = &tz1time_tm;
           char display_tmdt[20];
           strftime(display_tmdt, 20, "%a", tz1time_astm);
           std::string tmdt(display_tmdt);
@@ -763,8 +763,8 @@ display:
               id(message_clock_time_count) += 1;
               id(message_alive_time_count) += 1;
             }
-            std::time_t tz1time = (id(my_time).now().timestamp);
-            std::tm *tz1time_astm = localtime(&tz1time);
+            std::tm tz1time_tm = id(my_time).now().to_c_tm(); // local time (libc localtime() returns UTC since ESPHome 2026.4)
+            std::tm *tz1time_astm = &tz1time_tm;
             char display_tmdt[20];
             // check if the date should be displayed
             if ((id(time_display_count) >= (id(time_display_time).state)) && (id(date_display_mode).state != false)) {
