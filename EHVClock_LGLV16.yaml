@@ -893,6 +893,27 @@ text:
     entity_category: config
     icon: mdi:clock
     disabled_by_default: true
+  - platform: template
+    name: "NTP Server"
+    id: ntp_server
+    optimistic: true
+    min_length: 0
+    max_length: 31 # kept short: the ESP8266 flash preferences block is nearly full
+    mode: text
+    restore_value: true
+    initial_value: ""
+    on_value:
+      then:
+        - delay: 250ms
+        - lambda: |-
+            // Empty: ESPHome's default servers. A name that isn't a hostname or IPv4 address is rejected.
+            if (!vfd::set_ntp_server(x)) {
+              auto call = id(ntp_server).make_call();
+              call.set_value("");
+              call.perform();
+            }
+    entity_category: config
+    icon: mdi:server-network
 
 button:
   - platform: template
