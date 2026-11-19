@@ -159,24 +159,24 @@ script:
             - lambda: |-
                 if (id(use_ha_time_zones).state && !id(ha_time_zone).state.empty()) {
                   ESP_LOGI("info", "Set Time Zone (From HA)");
-                  id(my_time)->set_timezone(id(ha_time_zone).state.c_str());
-                  id(rtc_time)->set_timezone(id(ha_time_zone).state.c_str());
+                  vfd::set_timezone(id(ha_time_zone).state, id(my_time));
+                  vfd::set_timezone(id(ha_time_zone).state, id(rtc_time));
                 } else {
                   ESP_LOGI("info", "Set Time Zone (Internal)");
-                  id(my_time)->set_timezone("${time_zone}");
-                  id(rtc_time)->set_timezone("${time_zone}");
+                  vfd::set_timezone("${time_zone}", id(my_time));
+                  vfd::set_timezone("${time_zone}", id(rtc_time));
                 }
                 //id(my_time)->call_setup(); // might be needed?
           else:
             - lambda: |-
                 if (id(use_ha_time_zones).state && !id(ha_time_zone_alt).state.empty()) {
                   ESP_LOGI("info", "Set Time Zone Alt (From HA)");
-                  id(my_time)->set_timezone(id(ha_time_zone_alt).state.c_str());
-                  id(rtc_time)->set_timezone(id(ha_time_zone_alt).state.c_str());
+                  vfd::set_timezone(id(ha_time_zone_alt).state, id(my_time));
+                  vfd::set_timezone(id(ha_time_zone_alt).state, id(rtc_time));
                 } else {
                   ESP_LOGI("info", "Set Time Zone Alt (Internal)");
-                  id(my_time)->set_timezone("${time_zone_alt}");
-                  id(rtc_time)->set_timezone("${time_zone_alt}");
+                  vfd::set_timezone("${time_zone_alt}", id(my_time));
+                  vfd::set_timezone("${time_zone_alt}", id(rtc_time));
                 }
                 //id(my_time)->call_setup(); // might be needed?
 
