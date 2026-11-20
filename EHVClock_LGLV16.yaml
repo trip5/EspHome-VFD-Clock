@@ -462,6 +462,32 @@ text_sensor:
     entity_category: diagnostic
 
 sensor:
+  - platform: homeassistant # Home Assistant's home location, used while "Use Home Assistant Location" is on
+    id: ha_latitude
+    entity_id: zone.home
+    attribute: latitude
+    internal: true
+    on_value:
+      then:
+        - lambda: |-
+            if (id(use_ha_location).state && !std::isnan(x) && fabsf(x - id(latitude).state) > 0.00005f) {
+              auto call = id(latitude).make_call();
+              call.set_value(x);
+              call.perform();
+            }
+  - platform: homeassistant # Home Assistant's home location, used while "Use Home Assistant Location" is on
+    id: ha_longitude
+    entity_id: zone.home
+    attribute: longitude
+    internal: true
+    on_value:
+      then:
+        - lambda: |-
+            if (id(use_ha_location).state && !std::isnan(x) && fabsf(x - id(longitude).state) > 0.00005f) {
+              auto call = id(longitude).make_call();
+              call.set_value(x);
+              call.perform();
+            }
   - platform: wifi_signal
     name: "WiFi Signal Strength"
     id: wifisignal
@@ -945,6 +971,28 @@ button:
                 id(message_clock_time) = 0;
 
 switch:
+  - platform: template
+    name: "Use Home Assistant Location"
+    id: use_ha_location
+    restore_mode: RESTORE_DEFAULT_OFF
+    optimistic: true
+    turn_on_action:
+        - lambda: |-
+            ESP_LOGI("info", "Use Home Assistant Location On");
+            // Apply it now rather than at the next change of zone.home
+            if (!std::isnan(id(ha_latitude).state) && !std::isnan(id(ha_longitude).state)) {
+              auto lat = id(latitude).make_call();
+              lat.set_value(id(ha_latitude).state);
+              lat.perform();
+              auto lon = id(longitude).make_call();
+              lon.set_value(id(ha_longitude).state);
+              lon.perform();
+            }
+    turn_off_action:
+        - lambda: |-
+            ESP_LOGI("info", "Use Home Assistant Location Off");
+    entity_category: config
+    icon: mdi:home-map-marker
   - platform: template
     name: "12 Hour Mode"
     id: hour12_mode

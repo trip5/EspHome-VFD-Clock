@@ -209,6 +209,7 @@ Selectors in the WebUI join them together to display at specified intervals (for
 Text that is too long to display in the selected time will finish displaying.
 
 You will need to enter your GPS location using [Latitude and Longitude](https://www.gps-coordinates.net/) for it function correctly.
+If the clock is connected to Home Assistant, turn on `Use Home Assistant Location` to take them from Home Assistant's home location (`zone.home`) instead; they then follow it when it changes.
 It uses my [ESPHome-Open-Meteo component](https://github.com/trip5/ESPHome-Open-Meteo).
 
 It will not function without Internet connectivity (of course).
