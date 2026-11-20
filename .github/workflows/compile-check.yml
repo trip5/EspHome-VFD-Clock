@@ -1,0 +1,79 @@
+name: Compile check
+
+# Compiles the four YAMLs against the newest ESPHome every week, so an ESPHome release that
+# breaks them shows up here before users report it, and on pull requests. Also checks that
+# the LGLV16 files were regenerated with yaml-derive.py. Builds use this repo's own
+# components/vfd, so component changes in a pull request are what gets compiled.
+
+on:
+  pull_request:
+    paths:
+      - "*.yaml"
+      - "components/**"
+      - "yaml-derive.py"
+      - ".github/workflows/compile-check.yml"
+  schedule:
+    - cron: "23 5 * * 1" # Mondays
+  workflow_dispatch:
+
+jobs:
+  derived-files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: LGLV16 files match yaml-derive.py output
+        run: |
+          python yaml-derive.py EHVClock.yaml "LGLV16 Clock" EHVClock_LGLV16.yaml
+          python yaml-derive.py EHVClock-HA.yaml "LGLV16 Clock" EHVClock_LGLV16-HA.yaml
+          git diff --exit-code -- EHVClock_LGLV16.yaml EHVClock_LGLV16-HA.yaml
+
+  compile:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # "latest" catches new breakage; 2026.3.3 built the 2026.04.11 release
+        esphome: ["latest", "2026.3.3"]
+        yaml: [EHVClock, EHVClock-HA, EHVClock_LGLV16, EHVClock_LGLV16-HA]
+    name: ${{ matrix.yaml }} (ESPHome ${{ matrix.esphome }})
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install ESPHome
+        run: |
+          if [ "${{ matrix.esphome }}" = latest ]; then pip install esphome; else pip install "esphome==${{ matrix.esphome }}"; fi
+          esphome version
+      - name: Prepare (local vfd component, dummy secrets)
+        run: |
+          mkdir build
+          cp "${{ matrix.yaml }}.yaml" build/
+          cp -r components build/
+          python - "build/${{ matrix.yaml }}.yaml" <<'PY'
+          import re, sys
+          p = sys.argv[1]; s = open(p).read()
+          s, n = re.subn(r"  - source:\n      type: git\n      url: https://github.com/trip5/EspHome-VFD-Clock\n      ref: main\n(    refresh: [^\n]*\n)?    components: \[ ?vfd ?\]\n",
+                         "  - source:\n      type: local\n      path: components\n    components: [ vfd ]\n", s)
+          assert n == 1, "vfd external_components source not found"
+          open(p, "w").write(s)
+          PY
+          {
+            echo 'wifi_ssid: "ci"'
+            echo 'wifi_password: "ci-password"'
+            echo 'ap_password: "ci-password"'
+            echo 'ota_password: "ci-password"'
+            echo "encryption_key: \"$(head -c 32 /dev/urandom | base64)\""
+          } > build/secrets.yaml
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            ~/.cache/esphome
+          key: esphome-${{ matrix.esphome }}-${{ matrix.yaml }}-${{ hashFiles(format('{0}.yaml', matrix.yaml)) }}
+          restore-keys: esphome-${{ matrix.esphome }}-
+      - name: Compile
+        run: esphome compile "build/${{ matrix.yaml }}.yaml"
