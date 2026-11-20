@@ -180,6 +180,8 @@ Read more in the [Custom Component Driver](#custom-component-driver) section.
 
 Time can be synced to the Internet at configurable intervals between 1 - 24 hours, provided the wifi network is connected.
 
+The NTP server can be changed in the `NTP Server` text entity (a hostname or IPv4 address; leave it empty for ESPHome's default `pool.ntp.org` servers).
+
 ---
 
 ## Non-HA Version
