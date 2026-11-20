@@ -498,6 +498,7 @@ light:
     name: "Status LED"
     output: statusled
     internal: true
+    restore_mode: ALWAYS_OFF # no saved state: blinking while seeking Wi-Fi would write flash every flash_write_interval
 
 preferences:
   flash_write_interval: 15s # 0 does immediate write to memory with no mem buffer (not recommended) (only saves when persistent variables have changed)
